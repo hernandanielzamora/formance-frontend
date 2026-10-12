@@ -3,7 +3,11 @@
 Webapp independiente del seminario, con Next.js App Router, React y TypeScript.
 Estado: registro/login con Google o correo, verificación de correo y cierre de sesión.
 Rutas: `/registro`, `/login`, `/verificar-correo`, `/app`, `/admin/login` y `/admin`.
-El onboarding y las herramientas de gestión se implementarán en los siguientes commits.
+El onboarding `/onboarding` adapta el recorrido de Nutrivo: datos personales (cm/kg),
+actividad, objetivo y revisión editable de calorías/macros. Se guarda mediante la API;
+al acceder a `/app`, las cuentas sin perfil completo se dirigen al onboarding.
+El admin entra a `/admin` y puede abrir su perfil personal para completar el mismo recorrido.
+Las herramientas de gestión se implementarán en los siguientes commits.
 El logotipo de Formance se reutiliza del proyecto original.
 
 ## Inicio local

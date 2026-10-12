@@ -1,3 +1,4 @@
+import Link from 'next/link';
 export default function Home() {
   return (
     <main className="container">
@@ -8,7 +9,8 @@ export default function Home() {
         <article><span className="number">02</span><h2>Alimentación</h2><p>Registrá tus comidas y consultá tus totales diarios.</p></article>
         <article><span className="number">03</span><h2>Progreso</h2><p>Seguí tu peso y descubrí cómo fue tu semana.</p></article>
       </section>
-      <footer>Estamos preparando el primer recorrido de Formance.</footer>
+      <div className="home-actions"><Link className="primary-button" href="/registro">Crear mi cuenta</Link><Link href="/login">Ya tengo cuenta</Link></div>
+      <footer>Formance · Tu progreso empieza con el primer registro.</footer>
     </main>
   );
 }

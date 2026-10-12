@@ -1,7 +1,9 @@
 # Formance · Frontend
 
 Webapp independiente del seminario, con Next.js App Router, React y TypeScript.
-Estado: paso 1. Portada inicial y herramienta temporal `/setup`; aún no hay login ni funcionalidades de negocio.
+Estado: registro/login con Google o correo, verificación de correo y cierre de sesión.
+Rutas: `/registro`, `/login`, `/verificar-correo`, `/app`, `/admin/login` y `/admin`.
+El onboarding y las herramientas de gestión se implementarán en los siguientes commits.
 El logotipo de Formance se reutiliza del proyecto original.
 
 ## Inicio local
@@ -39,7 +41,8 @@ jamás colocar una cuenta de servicio, clave privada o clave de IA allí.
 El SDK se inicializa bajo demanda y el proyecto puede compilar sin Firebase configurado.
 `/setup` comprueba la API e inicializa el SDK, pero NO acredita una conexión remota a Firebase.
 Para eso ejecutar `npm.cmd run check:firebase` en el backend. El login real se implementará
-en el paso 2, junto con el flujo admin y los permisos del servidor.
+mediante la UI de registro/login. Google y Correo/Contraseña deben estar habilitados
+en Authentication. El acceso admin requiere un custom claim establecido desde Firebase Admin.
 
 ## Estructura
 

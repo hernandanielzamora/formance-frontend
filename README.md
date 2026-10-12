@@ -1,5 +1,14 @@
 # Formance · Frontend
 
+## Entrenamiento
+
+`/app/entrenamiento`: rutinas base ordenadas según el objetivo, rutinas propias,
+workouts y ejercicios buscables por nombre, grupo muscular y equipamiento.
+Se pueden crear workouts, copiar plantillas, editar la distribución semanal
+y elegir una rutina activa. Días vacíos indican descanso. Las sugerencias no
+restringen otras plantillas. El diseño usa tarjetas en desktop y una columna
+con navegación táctil en móvil. El registro de sesiones será el siguiente módulo.
+
 Webapp independiente del seminario, con Next.js App Router, React y TypeScript.
 Estado: registro/login con Google o correo, verificación de correo y cierre de sesión.
 Rutas: `/registro`, `/login`, `/verificar-correo`, `/app`, `/admin/login` y `/admin`.

@@ -2,20 +2,22 @@
 import { useState, type FormEvent } from "react";
 import { apiRequest } from "@/lib/api/client";
 import { getFirebaseAuth } from "@/lib/firebase/client";
-import { type Exercise, type WorkoutEntry } from "@/lib/training";
+import { type Exercise, type WorkoutEntry, type Workout } from "@/lib/training";
 
 export default function WorkoutEditor({
   exercises,
+  source = null,
   onSaved,
   onCancel,
 }: {
   exercises: Exercise[];
+  source?: Workout | null;
   onSaved: () => Promise<void>;
   onCancel: () => void;
 }) {
-  const [name, setName] = useState("");
-  const [focus, setFocus] = useState("Cuerpo completo");
-  const [entries, setEntries] = useState<WorkoutEntry[]>([]);
+  const [name, setName] = useState(source?.name || "");
+  const [focus, setFocus] = useState(source?.focus || "Cuerpo completo");
+  const [entries, setEntries] = useState<WorkoutEntry[]>(source?.exercises.map(({exerciseId,sets,repsMin,repsMax,restSeconds})=>({exerciseId,sets,repsMin,repsMax,restSeconds})) || []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   function change(
@@ -33,10 +35,10 @@ export default function WorkoutEditor({
     setError("");
     try {
       await apiRequest(
-        "training/workouts",
+        `training/workouts${source ? `/${source.id}` : ''}`,
         {
-          method: "POST",
-          body: JSON.stringify({ name, focus, exercises: entries }),
+          method: source ? "PUT" : "POST",
+          body: JSON.stringify({ name, focus, exercises: entries, ...(source ? {expectedVersion:source.version}: {}) }),
         },
         getFirebaseAuth(),
       );
@@ -54,7 +56,7 @@ export default function WorkoutEditor({
       <div className="editor-heading">
         <div>
           <p className="eyebrow">TU SESIÓN DE ENTRENAMIENTO</p>
-          <h2>Crear workout</h2>
+          <h2>{source ? 'Editar workout' : 'Crear workout'}</h2>
         </div>
         <button type="button" disabled={busy} onClick={onCancel}>
           Cancelar

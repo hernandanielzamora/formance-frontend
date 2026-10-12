@@ -8,6 +8,10 @@ Se pueden crear workouts, copiar plantillas, editar la distribución semanal
 y elegir una rutina activa. Días vacíos indican descanso. Las sugerencias no
 restringen otras plantillas. El diseño usa tarjetas en desktop y una columna
 con navegación táctil en móvil. El registro de sesiones será el siguiente módulo.
+Ejercicios, workouts y rutinas se leen y guardan en Firebase a través de la API.
+Crear está disponible para todos. Editar/borrar se habilita según permisos del
+servidor: propietario o administrador. El admin también ve contenido personal
+de otros usuarios. El borrado requiere confirmación y conserva el historial.
 
 Webapp independiente del seminario, con Next.js App Router, React y TypeScript.
 Estado: registro/login con Google o correo, verificación de correo y cierre de sesión.

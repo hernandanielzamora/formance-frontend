@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { sendEmailVerification } from 'firebase/auth';
 import { useAuth } from '@/lib/auth/provider';
 import { authError } from '@/lib/auth/errors';
+import Link from 'next/link';
+import Icon from '@/components/ui/Icon';
 
 export default function VerifyEmail() {
   const session = useAuth(); const router = useRouter();
@@ -20,5 +22,5 @@ export default function VerifyEmail() {
       else { await session.refresh(); setMessage('Si ya abriste el enlace, tu cuenta se actualizará.'); }
     } catch (e) { setMessage(authError(e)); } finally { setBusy(false); }
   }
-  return <main className="container"><section className="auth-card"><h1>Verificá tu correo</h1><p>Abrí el enlace de verificación que enviamos a {session.user?.email}. Después volvé acá para continuar.</p><button disabled={busy} onClick={() => void action(false)}>Ya verifiqué mi correo</button><button disabled={busy} onClick={() => void action(true)}>Reenviar correo</button><p role="status">{message || session.error}</p><button onClick={() => void session.logout()}>Cerrar sesión</button></section></main>;
+  return <main className="access-page"><Link href="/"><img className="brand" src="/brand/formance.svg" width="180" height="38" alt="Formance" /></Link><section className="access-card"><span className="icon-tile"><Icon name="check" /></span><h1>Un último paso:<br />tu correo.</h1><p>Abrí el enlace de verificación que enviamos a <strong>{session.user?.email}</strong>. Después volvé acá para continuar.</p><p>Si no lo encontrás, revisá la carpeta de spam.</p><div className="button-stack"><button className="primary-button" disabled={busy} onClick={() => void action(false)}>{busy ? 'Un momento…' : 'Ya verifiqué mi correo'}<Icon name="arrow" /></button><button disabled={busy} onClick={() => void action(true)}>Reenviar correo</button></div><p role="status">{message || session.error}</p><button onClick={() => void session.logout()}>Usar otra cuenta</button></section></main>;
 }

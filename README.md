@@ -10,6 +10,20 @@ El admin entra a `/admin` y puede abrir su perfil personal para completar el mis
 Las herramientas de gestión se implementarán en los siguientes commits.
 El logotipo de Formance se reutiliza del proyecto original.
 
+## Diseño y experiencia
+
+Identidad con Geist local, fondos claros y acentos verde lima. Portada con recorrido de
+registro y fotografías originales del proyecto anterior. Recursos reutilizados:
+`public/brand` (logos), `public/images` (fotografías e ilustraciones de Nutrivo) y
+`src/app/fonts/GeistVF.woff` (fuente del dashboard original).
+No se descargan fuentes ni imágenes de servicios externos.
+
+Registro/login incluyen mostrar contraseña, recuperación en `/recuperar-acceso`,
+estados de carga y acceso administrativo separado. El onboarding muestra el paso
+actual y un resumen antes de confirmar. Las funciones pendientes se identifican
+como próximas y no presentan botones sin acción. Las vistas se adaptan a móvil
+y respetan `prefers-reduced-motion`.
+
 ## Inicio local
 
 Usar Node.js 24 LTS. En PowerShell usar `npm.cmd` si `npm` está bloqueado.

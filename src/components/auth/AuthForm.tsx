@@ -6,6 +6,9 @@ import { createUserWithEmailAndPassword, GoogleAuthProvider, sendEmailVerificati
 import { getFirebaseAuth } from '@/lib/firebase/client';
 import { useAuth } from '@/lib/auth/provider';
 import { authError } from '@/lib/auth/errors';
+import Image from 'next/image';
+import PasswordInput from './PasswordInput';
+import Icon from '@/components/ui/Icon';
 
 export default function AuthForm({ mode = 'login', admin = false }: { mode?: 'login' | 'register'; admin?: boolean }) {
   const register = mode === 'register';
@@ -46,12 +49,14 @@ export default function AuthForm({ mode = 'login', admin = false }: { mode?: 'lo
     } catch (e) { setError(authError(e)); } finally { setBusy(false); }
   }
   const forbidden = admin && session.identity?.role === 'user';
-  return <main className="auth-shell"><section className="auth-story"><Link href="/"><img src="/brand/formance.svg" width="230" height="48" alt="Formance" /></Link><p className="eyebrow">UN PASO MÁS CERCA DE TU OBJETIVO</p><h1>Tu constancia.<br /><span>Tu progreso.</span></h1><p>Uní tus entrenamientos, alimentación y evolución en un mismo lugar.</p><div className="auth-story-bottom">Registrá · Comprendé · Avanzá</div></section><section className="auth-card"><span className="badge">{admin ? 'Administración' : 'Bienvenido a Formance'}</span><h2>{register ? 'Creá tu cuenta' : admin ? 'Acceso de administrador' : 'Volvé a tu progreso'}</h2><p>{register ? 'Empezá a construir tu historial.' : 'Iniciá sesión para continuar.'}</p>
+  return <main className="auth-shell"><section className="auth-story"><Image className="auth-background" src="/images/training-woman.webp" alt="" fill sizes="(max-width: 800px) 100vw, 50vw" preload /><Link className="auth-brand" href="/"><img src="/brand/formance-white.svg" width="190" height="40" alt="Formance" /></Link><div className="auth-story-copy"><p className="eyebrow">UN PASO MÁS CERCA DE TU OBJETIVO</p><h1>Tu constancia.<br /><span>Tu progreso.</span></h1><p>Cada pequeño paso cuenta. Empezá por definir el tuyo.</p></div><div className="auth-story-bottom"><span className="status-dot" /> FORMANCE · HECHO PARA VOS</div></section><section className="auth-card"><Link className="back-link" href="/">← Volver al inicio</Link><span className="badge">{admin ? 'Administración' : register ? 'TU PUNTO DE PARTIDA' : 'QUÉ BUENO VERTE DE NUEVO'}</span><h2>{register ? 'Creá tu cuenta' : admin ? 'Acceso de administrador' : 'Volvé a tu progreso'}</h2><p>{register ? 'Tu objetivo empieza con el primer paso.' : 'Ingresá y seguí desde donde lo dejaste.'}</p>
     {forbidden ? <><p role="alert" className="form-error">Esta cuenta no tiene permisos de administrador.</p><button onClick={() => void session.logout()}>Usar otra cuenta</button><Link href="/app">Volver a mi cuenta</Link></> : <>
-    <button className="google-button" onClick={google} disabled={busy}>Continuar con Google</button><div className="divider">o con tu correo</div>
-    <form onSubmit={submit}>{register && <label>Nombre<input name="name" autoComplete="name" required maxLength={80} /></label>}<label>Correo electrónico<input name="email" type="email" autoComplete="email" required maxLength={254} /></label><label>Contraseña<input name="password" type="password" autoComplete={register ? 'new-password' : 'current-password'} required minLength={register ? 8 : undefined} maxLength={128} /></label>{register && <><small>Usá al menos 8 caracteres.</small><label>Confirmá tu contraseña<input name="confirm" type="password" autoComplete="new-password" required minLength={8} maxLength={128} /></label></>}
+    <button className="google-button" onClick={google} disabled={busy || session.loading}><span className="google-mark" aria-hidden="true">G</span>Continuar con Google</button><div className="divider">o con tu correo</div>
+    <form onSubmit={submit} aria-busy={busy}>{register && <label>Nombre<input name="name" autoComplete="name" required maxLength={80} placeholder="¿Cómo te llamás?" /></label>}<label>Correo electrónico<input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="vos@ejemplo.com" /></label><PasswordInput name="password" label="Contraseña" register={register} />{register && <PasswordInput name="confirm" label="Confirmá tu contraseña" register confirm />}
+    {!register && <Link className="forgot-link" href="/recuperar-acceso">Olvidé mi contraseña</Link>}
     {(error || session.error) && <p className="form-error" role="alert">{error || session.error}</p>}
-    <button className="primary-button" disabled={busy}>{busy ? 'Un momento…' : register ? 'Crear cuenta' : 'Iniciar sesión'}</button></form>
+    {session.error && <div className="inline-actions"><button type="button" onClick={() => void session.refresh().catch((e) => setError(authError(e)))}>Reintentar conexión</button>{session.user && <button type="button" onClick={() => void session.logout()}>Usar otra cuenta</button>}</div>}
+    <button className="primary-button" disabled={busy || session.loading}>{busy ? 'Un momento…' : register ? 'Crear cuenta' : 'Iniciar sesión'}{!busy && <Icon name="arrow" />}</button></form>
     {!admin && <p className="auth-switch">{register ? '¿Ya tenés cuenta?' : '¿Primera vez acá?'} <Link href={register ? '/login' : '/registro'}>{register ? 'Iniciá sesión' : 'Creá tu cuenta'}</Link></p>}
     </>}{!admin && <Link className="admin-link" href="/admin/login">Acceso de administrador</Link>}</section></main>;
 }

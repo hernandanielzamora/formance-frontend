@@ -7,7 +7,14 @@ workouts y ejercicios buscables por nombre, grupo muscular y equipamiento.
 Se pueden crear workouts, copiar plantillas, editar la distribución semanal
 y elegir una rutina activa. Días vacíos indican descanso. Las sugerencias no
 restringen otras plantillas. El diseño usa tarjetas en desktop y una columna
-con navegación táctil en móvil. El registro de sesiones será el siguiente módulo.
+con navegación táctil en móvil.
+La rutina activa abre `/app/entrenamiento/calendario`: semana de lunes a domingo,
+entrenamientos y descansos, selección de fecha e historial diario. Desde un workout
+se registra una sesión con repeticiones, carga externa en kg y series realizadas.
+Se puede guardar parcialmente, retomar, finalizar o interrumpir. El guardado es
+explícito; los registros cerrados son de solo lectura. No se registran días futuros.
+La API conserva snapshots de la planificación y distingue 0 kg de carga no registrada.
+Los reportes agregados de progreso y adherencia siguen pendientes.
 Ejercicios, workouts y rutinas se leen y guardan en Firebase a través de la API.
 Crear está disponible para todos. Editar/borrar se habilita según permisos del
 servidor: propietario o administrador. El admin también ve contenido personal

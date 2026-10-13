@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { onIdTokenChanged, signOut, type User } from 'firebase/auth';
 import { getFirebaseAuth, isFirebaseConfigured } from '@/lib/firebase/client';
-import { apiRequest } from '@/lib/api/client';
+import { apiRequest, ApiError } from '@/lib/api/client';
 
 export type Identity = { uid: string; email: string | null; name: string | null; emailVerified: boolean; role: 'user' | 'admin' };
 type AuthState = { user: User | null; identity: Identity | null; loading: boolean; error: string; refresh: () => Promise<void>; logout: () => Promise<void> };
@@ -22,8 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await apiRequest<Identity>('auth/me', {}, getFirebaseAuth());
         if (generation.current === id) setIdentity(result);
       }
-    } catch {
-      if (generation.current === id) setError('No pudimos validar tu sesión con el servidor.');
+    } catch (error) {
+      if (generation.current === id) setError(error instanceof ApiError ? error.message : 'No pudimos validar tu sesión con el servidor.');
     } finally { if (generation.current === id) setLoading(false); }
   }
   useEffect(() => {

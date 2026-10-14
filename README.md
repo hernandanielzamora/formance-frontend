@@ -1,8 +1,57 @@
 # Formance · Frontend
 
+## Alimentación
+
+`/app/alimentacion`: diario por fecha y momento del día, totales frente a objetivos,
+registro manual por 100 g o por porción, búsqueda USDA y estimación editable desde
+foto con Gemini. Se puede editar, duplicar y quitar comidas. Los nutrientes sin
+datos se distinguen de cero; las fotos requieren consentimiento antes de enviar.
+Las claves van exclusivamente en el `.env` del backend. La interfaz funciona
+con carga manual cuando los proveedores no están configurados.
+
+## Entrenamiento
+
+`/app/entrenamiento`: rutinas base ordenadas según el objetivo, rutinas propias,
+workouts y ejercicios buscables por nombre, grupo muscular y equipamiento.
+Se pueden crear workouts, copiar plantillas, editar la distribución semanal
+y elegir una rutina activa. Días vacíos indican descanso. Las sugerencias no
+restringen otras plantillas. El diseño usa tarjetas en desktop y una columna
+con navegación táctil en móvil.
+La rutina activa abre `/app/entrenamiento/calendario`: semana de lunes a domingo,
+entrenamientos y descansos, selección de fecha e historial diario. Desde un workout
+se registra una sesión con repeticiones, carga externa en kg y series realizadas.
+Se puede guardar parcialmente, retomar, finalizar o interrumpir. El guardado es
+explícito; los registros cerrados son de solo lectura. No se registran días futuros.
+La API conserva snapshots de la planificación y distingue 0 kg de carga no registrada.
+Los reportes agregados de progreso y adherencia siguen pendientes.
+Ejercicios, workouts y rutinas se leen y guardan en Firebase a través de la API.
+Crear está disponible para todos. Editar/borrar se habilita según permisos del
+servidor: propietario o administrador. El admin también ve contenido personal
+de otros usuarios. El borrado requiere confirmación y conserva el historial.
+
 Webapp independiente del seminario, con Next.js App Router, React y TypeScript.
-Estado: paso 1. Portada inicial y herramienta temporal `/setup`; aún no hay login ni funcionalidades de negocio.
+Estado: registro/login con Google o correo, verificación de correo y cierre de sesión.
+Rutas: `/registro`, `/login`, `/verificar-correo`, `/app`, `/admin/login` y `/admin`.
+El onboarding `/onboarding` adapta el recorrido de Nutrivo: datos personales (cm/kg),
+actividad, objetivo y revisión editable de calorías/macros. Se guarda mediante la API;
+al acceder a `/app`, las cuentas sin perfil completo se dirigen al onboarding.
+El admin entra a `/admin` y puede abrir su perfil personal para completar el mismo recorrido.
+Las herramientas de gestión se implementarán en los siguientes commits.
 El logotipo de Formance se reutiliza del proyecto original.
+
+## Diseño y experiencia
+
+Identidad con Geist local, fondos claros y acentos verde lima. Portada con recorrido de
+registro y fotografías originales del proyecto anterior. Recursos reutilizados:
+`public/brand` (logos), `public/images` (fotografías e ilustraciones de Nutrivo) y
+`src/app/fonts/GeistVF.woff` (fuente del dashboard original).
+No se descargan fuentes ni imágenes de servicios externos.
+
+Registro/login incluyen mostrar contraseña, recuperación en `/recuperar-acceso`,
+estados de carga y acceso administrativo separado. El onboarding muestra el paso
+actual y un resumen antes de confirmar. Las funciones pendientes se identifican
+como próximas y no presentan botones sin acción. Las vistas se adaptan a móvil
+y respetan `prefers-reduced-motion`.
 
 ## Inicio local
 
@@ -39,7 +88,8 @@ jamás colocar una cuenta de servicio, clave privada o clave de IA allí.
 El SDK se inicializa bajo demanda y el proyecto puede compilar sin Firebase configurado.
 `/setup` comprueba la API e inicializa el SDK, pero NO acredita una conexión remota a Firebase.
 Para eso ejecutar `npm.cmd run check:firebase` en el backend. El login real se implementará
-en el paso 2, junto con el flujo admin y los permisos del servidor.
+mediante la UI de registro/login. Google y Correo/Contraseña deben estar habilitados
+en Authentication. El acceso admin requiere un custom claim establecido desde Firebase Admin.
 
 ## Estructura
 

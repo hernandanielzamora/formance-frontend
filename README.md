@@ -1,5 +1,14 @@
 # Formance · Frontend
 
+## Alimentación
+
+`/app/alimentacion`: diario por fecha y momento del día, totales frente a objetivos,
+registro manual por 100 g o por porción, búsqueda USDA y estimación editable desde
+foto con Gemini. Se puede editar, duplicar y quitar comidas. Los nutrientes sin
+datos se distinguen de cero; las fotos requieren consentimiento antes de enviar.
+Las claves van exclusivamente en el `.env` del backend. La interfaz funciona
+con carga manual cuando los proveedores no están configurados.
+
 ## Entrenamiento
 
 `/app/entrenamiento`: rutinas base ordenadas según el objetivo, rutinas propias,

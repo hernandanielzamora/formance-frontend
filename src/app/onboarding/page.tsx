@@ -32,7 +32,7 @@ export default function Onboarding() {
     event.preventDefault(); setError('');
     if (step < 2) { setStep(step + 1); return; }
     setBusy(true);
-    const personal = { ...draft, name: draft.name.trim(), age: Number(draft.age), heightCm: Number(draft.heightCm), initialWeightKg: Number(draft.initialWeightKg) };
+    const personal = { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, ...draft, name: draft.name.trim(), age: Number(draft.age), heightCm: Number(draft.heightCm), initialWeightKg: Number(draft.initialWeightKg) };
     try {
       if (step === 2) {
         const result = await apiRequest<Targets>('profile/onboarding/preview', { method: 'POST', body: JSON.stringify(personal) }, getFirebaseAuth());

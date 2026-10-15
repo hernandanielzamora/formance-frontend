@@ -1,5 +1,16 @@
 # Formance · Frontend
 
+## Reportes
+
+`/app/reportes`: resumen semanal con comparación del mismo período anterior,
+sesiones/series/carga externa, nutrición, peso y completitud. Historial filtrable por
+día, tipo, estado y texto con detalle de series, comidas y mediciones. No realiza llamadas
+a IA. La interpretación de la semana mediante IA queda pendiente.
+
+`/app/peso`: registro diario en kg, edición y archivo, nota opcional, gráfico
+interactivo e historial por fechas. Conserva el peso inicial del onboarding.
+Los promedios usan solo fechas con mediciones y no completan días vacíos.
+
 ## Alimentación
 
 `/app/alimentacion`: diario por fecha y momento del día, totales frente a objetivos,
@@ -23,7 +34,7 @@ se registra una sesión con repeticiones, carga externa en kg y series realizada
 Se puede guardar parcialmente, retomar, finalizar o interrumpir. El guardado es
 explícito; los registros cerrados son de solo lectura. No se registran días futuros.
 La API conserva snapshots de la planificación y distingue 0 kg de carga no registrada.
-Los reportes agregados de progreso y adherencia siguen pendientes.
+Los reportes semanales están disponibles; la adherencia histórica queda pendiente.
 Ejercicios, workouts y rutinas se leen y guardan en Firebase a través de la API.
 Crear está disponible para todos. Editar/borrar se habilita según permisos del
 servidor: propietario o administrador. El admin también ve contenido personal

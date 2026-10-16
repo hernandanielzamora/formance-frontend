@@ -1,5 +1,9 @@
 # Formance · Frontend
 
+El inicio y las pantallas internas incluyen un aviso permanente sobre el alcance de
+la herramienta: Formance no reemplaza la evaluación ni atención profesional de
+nutricionistas, kinesiólogos, médicos o profesionales del entrenamiento.
+
 Calendario con preview de ejercicios y revisión de pantallas:
 [alcance de la auditoría responsive](docs/responsive-audit.md).
 

@@ -1,6 +1,7 @@
 'use client';
 import { usePathname } from 'next/navigation';
 import AppSidebar from './AppSidebar';
+import ProfessionalCareNotice from './ProfessionalCareNotice';
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,6 +11,6 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   return <div className="dashboard app-shell">
     <a className="skip-link" href="#dashboard-content">Ir al contenido</a>
     <AppSidebar current={current} />
-    <main id="dashboard-content" className="dashboard-content" tabIndex={-1}>{children}</main>
+    <main id="dashboard-content" className="dashboard-content" tabIndex={-1}>{children}<ProfessionalCareNotice /></main>
   </div>;
 }

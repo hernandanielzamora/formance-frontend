@@ -1,5 +1,8 @@
 # Formance · Frontend
 
+Calendario con preview de ejercicios y revisión de pantallas:
+[alcance de la auditoría responsive](docs/responsive-audit.md).
+
 ## Conexión al backend gratuito
 
 Al abrir la app se comprueba `/api/health`. Si el servicio está arrancando, las

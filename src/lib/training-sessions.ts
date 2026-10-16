@@ -1,4 +1,4 @@
-import type { Routine } from './training';
+import type { Routine, WorkoutEntry } from './training';
 export type LoggedSet = { setId: string; order: number; reps: number | null; externalLoadKg: number | null; completed: boolean };
 export type TrainingSession = {
   id: string; version: number; routineId: string; routineVersion: number; routineName: string;
@@ -7,7 +7,8 @@ export type TrainingSession = {
   workoutSnapshot: { name: string; entries: { entryId: string; exerciseId: string; exerciseName: string; tracking: string; planned: { sets: number; repsMin: number; repsMax: number; restSeconds: number } }[] };
   performedEntries: { entryId: string; exerciseId: string; sets: LoggedSet[] }[];
 };
-export type CalendarRoutine = Omit<Routine, 'days'> & { days: { dayIndex: number; workoutIds: string[]; assignments?: { assignmentId: string; workoutId: string; workoutVersion: number; name: string }[] }[] };
+export type CalendarAssignment = { assignmentId: string; workoutId: string; workoutVersion: number; name: string; exercises?: (WorkoutEntry & { entryId?: string; exerciseName?: string; muscle?: string; equipment?: string })[] };
+export type CalendarRoutine = Omit<Routine, 'days'> & { days: { dayIndex: number; workoutIds: string[]; assignments?: CalendarAssignment[] }[] };
 export type TrainingCalendar = { routine: CalendarRoutine | null; sessions: TrainingSession[]; today: string; timeZone: string };
 export const sessionStatus = { in_progress: 'En curso', completed: 'Completada', abandoned: 'Interrumpida' };
 // Dates are calendar values, never instants in the browser's timezone.

@@ -9,6 +9,7 @@ import { dayNames } from '@/lib/training';
 import { addDays, monday, localDate, dateLabel, sessionStatus, type TrainingCalendar, type TrainingSession } from '@/lib/training-sessions';
 import DashboardLoading from '@/components/ui/DashboardLoading';
 import SessionRecorder from '@/components/training/SessionRecorder';
+import WorkoutPreview from '@/components/training/WorkoutPreview';
 import Icon from '@/components/ui/Icon';
 
 export default function CalendarPage() {
@@ -89,7 +90,7 @@ export default function CalendarPage() {
         {assignments.map(assignment => {
           const existing = dailySessions.filter(item => item.routineId === calendar.routine?.id && item.routineVersion === calendar.routine?.version && item.assignmentId === assignment.assignmentId);
           const open = existing.find(item => item.status === 'in_progress');
-          return <article className="calendar-workout" key={assignment.assignmentId}><div><span className="badge">Planificado</span><h3>{assignment.name}</h3><p>{existing.length ? `${existing.length} sesiones registradas` : 'Todavía sin registro'}</p></div>{open ? <button className="primary-button" disabled={busy || loading} onClick={() => setSession(open)}>Continuar registro</button> : <button className="primary-button" disabled={busy || loading || selected > calendar.today} onClick={() => void start(assignment.assignmentId)}>{busy ? 'Preparando…' : existing.length ? 'Registrar otra sesión' : 'Registrar entrenamiento'}</button>}</article>;
+          return <article className="calendar-workout" key={assignment.assignmentId}><div className="calendar-workout-heading"><div><span className="badge">Planificado</span><h3>{assignment.name}</h3><p>{existing.length ? `${existing.length} sesiones registradas` : 'Todavía sin registro'}</p></div>{open ? <button className="primary-button" disabled={busy || loading} onClick={() => setSession(open)}>Continuar registro</button> : <button className="primary-button" disabled={busy || loading || selected > calendar.today} onClick={() => void start(assignment.assignmentId)}>{busy ? 'Preparando…' : existing.length ? 'Registrar otra sesión' : 'Registrar entrenamiento'}</button>}</div><WorkoutPreview assignment={assignment} /></article>;
         })}
         {selected > calendar.today && assignments.length > 0 && <p className="calendar-hint">Podrás registrar estos workouts cuando llegue el día.</p>}
         {loading ? <p role="status">Cargando registros de esta semana…</p> : dailySessions.length > 0 && <div className="session-history"><h3>Registros del día</h3>{dailySessions.map(item => <button key={item.id} className="session-history-item" onClick={() => setSession(item)}><span><strong>{item.workoutSnapshot.name}</strong><small>{sessionStatus[item.status]} · {item.performedEntries.reduce((count, entry) => count + entry.sets.filter(set => set.completed).length, 0)} series realizadas{item.timeZone !== calendar.timeZone ? ` \u00b7 ${item.timeZone}` : ''}</small></span><span>Ver registro →</span></button>)}</div>}

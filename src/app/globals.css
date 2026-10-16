@@ -39,6 +39,10 @@ h2 { font-size:34px; line-height:1.14; letter-spacing:-1.1px; font-weight:550; }
 h3 { font-size:21px; letter-spacing:-.5px; font-weight:600; }
 p { line-height:1.65; }
 .description { font-size:17px; color:var(--muted); max-width:440px; }
+.description,.dashboard-content,.auth-card,.access-card,.onboarding-card { overflow-wrap:anywhere; }
+.vision-copy li>div { min-width:0; }
+.vision-copy .feature-link { flex-shrink:0; min-height:44px; padding:10px 12px; border-radius:12px; background:#eaf0df; color:#425c2a; font-size:12px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+.vision-copy .feature-link:hover { background:#dce9ca; }
 .badge,.coming-label { display:inline-block; font-size:10px; background:#eaf0df; padding:7px 11px; border-radius:30px; font-weight:600; letter-spacing:.4px; }
 .icon-tile,.number { display:inline-grid; place-items:center; width:44px; height:44px; border-radius:12px; background:var(--accent); font-weight:650; font-size:12px; flex-shrink:0; }
 .text-link { text-decoration:none; font-weight:550; font-size:14px; }
@@ -314,6 +318,23 @@ input,select,textarea { min-width:0; }
 .selected-day { margin-top:30px; }
 .selected-day>h2 { font-size:24px; text-transform:capitalize; }
 .calendar-workout,.rest-day { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px; border:1px solid var(--line); border-radius:16px; background:white; margin-bottom:14px; }
+.calendar-workout { display:block; }
+.calendar-workout-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.calendar-workout-heading>div { min-width:0; }
+.calendar-workout-heading>button { flex-shrink:0; }
+.workout-preview { margin-top:22px; border-top:1px solid var(--line); padding-top:18px; min-width:0; }
+.workout-preview-summary { font-weight:600; }
+.workout-preview ol { list-style:none; margin:14px 0; padding:0; }
+.workout-preview li { display:grid; grid-template-columns:minmax(0,1fr) minmax(230px,.8fr); align-items:center; gap:20px; padding:16px 0; border-bottom:1px solid var(--line); }
+.preview-exercise-name { display:flex; align-items:flex-start; gap:12px; min-width:0; }
+.preview-exercise-name>span { display:grid; place-items:center; width:28px; height:28px; flex-shrink:0; border-radius:8px; background:#edf4e2; font-size:12px; }
+.preview-exercise-name strong { display:block; overflow-wrap:anywhere; font-size:14px; line-height:1.5; }
+.preview-exercise-name small { display:block; color:var(--muted); font-size:12px; margin-top:4px; overflow-wrap:anywhere; }
+.workout-preview dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0; }
+.workout-preview dt { font-size:11px; color:var(--muted); overflow-wrap:anywhere; }
+.workout-preview dd { font-size:14px; font-weight:600; margin:5px 0 0; }
+@media(max-width:1100px) { .workout-preview li { grid-template-columns:1fr; gap:12px; } }
+@media(max-width:580px) { .calendar-workout-heading { align-items:stretch; flex-direction:column; gap:16px; } .calendar-workout-heading>button { width:100%; } .workout-preview dl { padding-left:40px; gap:8px; } }
 .calendar-workout>div { min-width:0; }
 .calendar-workout h3,.rest-day h3 { margin:12px 0 8px; font-size:18px; overflow-wrap:anywhere; }
 .calendar-workout p,.rest-day p { margin:0; color:var(--muted); font-size:13px; }
@@ -510,3 +531,4 @@ input,select,textarea { min-width:0; }
 .report-weight { margin-top:0; margin-bottom:36px; }
 @media(max-width:800px) { .weight-metrics { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); } }
 @media(max-width:580px) { .weight-range label { max-width:none; min-width:0; flex-basis:calc(50% - 8px); } .weight-range .inline-actions { width:100%; } .weight-metrics { grid-template-columns:1fr; } .weight-metrics h2 { min-height:0; } .weight-chart { padding:20px 12px; } .weight-history>article { flex-direction:column; align-items:stretch; padding:20px; } .weight-history .inline-actions button { flex:1; } .weight-chart svg { min-height:170px; } }
+@media(max-width:580px) { .vision-copy li { display:grid; grid-template-columns:24px minmax(0,1fr); align-items:start; } .vision-copy .feature-link { grid-column:2; justify-self:start; } }

@@ -64,7 +64,7 @@ export default function WorkoutEditor({
       </div>
       <p>
         Agregá ejercicios en el orden en que querés realizarlos. Las series y
-        repeticiones son lo planificado; el registro real se sumará después.
+        repeticiones son lo planificado; las series realizadas se cargan desde el calendario.
       </p>
       <form onSubmit={save}>
         <div className="personal-grid">

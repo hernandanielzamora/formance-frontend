@@ -4,7 +4,10 @@ import { apiRequest, ApiError } from '@/lib/api/client';
 import { getFirebaseAuth } from '@/lib/firebase/client';
 import { dateLabel, sessionStatus, type TrainingSession, type LoggedSet } from '@/lib/training-sessions';
 
+import { useApiMutationRequest } from '@/lib/store/hooks';
+
 export default function SessionRecorder({ initial, onSaved, onClose }: { initial: TrainingSession; onSaved: (session: TrainingSession) => void; onClose: () => void }) {
+  const request = useApiMutationRequest();
   const [session, setSession] = useState(initial);
   const [entries, setEntries] = useState(() => initial.performedEntries.map((entry, index) => ({ ...entry, sets: entry.sets.length || initial.status !== 'in_progress' ? entry.sets : Array.from({ length: initial.workoutSnapshot.entries[index].planned.sets }, (_, order) => ({ setId: crypto.randomUUID(), order, reps: null, externalLoadKg: null, completed: false })) })));
   const [note, setNote] = useState(initial.note); const [dirty, setDirty] = useState(false);
@@ -31,7 +34,7 @@ export default function SessionRecorder({ initial, onSaved, onClose }: { initial
     if (status === 'abandoned' && !window.confirm('¿Interrumpir esta sesión? Se conservarán las series guardadas y no podrás seguir editándola.')) return;
     setBusy(true); setError(''); setNotice('');
     try {
-      const result = await apiRequest<{ session: TrainingSession }>(`training/sessions/${session.id}`, { method: 'PUT', body: JSON.stringify({ expectedVersion: session.version, status, note, performedEntries: entries }) }, getFirebaseAuth());
+      const result = await request<{ session: TrainingSession }>(`training/sessions/${session.id}`, { method: 'PUT', body: JSON.stringify({ expectedVersion: session.version, status, note, performedEntries: entries }) });
       setSession(result.session); setEntries(result.session.performedEntries); setDirty(false); setNotice(status === 'in_progress' ? 'Series guardadas. Podés continuar más tarde.' : 'Sesión registrada en tu historial.'); onSaved(result.session);
     } catch (e) { setError(e instanceof Error ? e.message : 'No pudimos guardar la sesión.'); if (e instanceof ApiError && e.status === 409) setConflict(true); }
     finally { setBusy(false); }

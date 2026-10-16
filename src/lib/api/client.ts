@@ -6,6 +6,7 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}, auth?: Auth): Promise<T> {
+  const requestUser = auth?.currentUser;
   try { await waitForBackend(options.signal); }
   catch (error) {
     if (options.signal?.aborted) throw error;
@@ -13,7 +14,12 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}, aut
   }
   const headers = new Headers(options.headers);
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  if (auth?.currentUser) headers.set('Authorization', `Bearer ${await auth.currentUser.getIdToken()}`);
+  if (auth && auth.currentUser?.uid !== requestUser?.uid) throw new ApiError(401, 'La sesión cambió. Volvé a ingresar.');
+  if (requestUser) {
+    const token = await requestUser.getIdToken();
+    if (auth?.currentUser?.uid !== requestUser.uid) throw new ApiError(401, 'La sesión cambió. Volvé a ingresar.');
+    headers.set('Authorization', `Bearer ${token}`);
+  }
   let response: Response;
   try {
     response = await fetch(`${apiBaseUrl}/${path.replace(/^\//, '')}`, { ...options, headers, cache: 'no-store', signal: AbortSignal.any([AbortSignal.timeout(options.signal ? 60_000 : 30_000), ...(options.signal ? [options.signal] : [])]) });

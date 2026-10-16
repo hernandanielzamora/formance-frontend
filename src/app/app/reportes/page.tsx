@@ -1,10 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/provider';
-import { apiRequest } from '@/lib/api/client';
-import { getFirebaseAuth } from '@/lib/firebase/client';
+import { useCachedQuery, useDashboardProfile } from '@/lib/store/hooks';
 import { addDays, monday, localDate, dateLabel, sessionStatus } from '@/lib/training-sessions';
 import { formatNumber, nutrientKeys, nutrientLabels, mealTypes } from '@/lib/food';
 import type { ReportLog, WeeklyReport } from '@/lib/reports';
@@ -14,37 +12,24 @@ import WeightChart from '@/components/weight/WeightChart';
 const delta = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)}`;
 const mealName = (name: string) => mealTypes.find(([key]) => key === name)?.[1] || 'Comida';
 export default function ReportsPage() {
-  const session = useAuth(); const router = useRouter();
+  const session = useAuth();
   const [week, setWeek] = useState(() => monday(localDate())); const [zone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [report, setReport] = useState<WeeklyReport | null>(null); const [loaded, setLoaded] = useState(''); const [error, setError] = useState(''); const [retry, setRetry] = useState(0);
   const [tab, setTab] = useState<'summary' | 'history'>('summary'); const [filter, setFilter] = useState<'all' | 'training' | 'food' | 'weight'>('all'); const [status, setStatus] = useState(''); const [search, setSearch] = useState('');
   const [historyDate, setHistoryDate] = useState('');
   useEffect(() => { setHistoryDate(''); }, [week]);
-  useEffect(() => {
-    if (session.loading) return;
-    if (!session.user) { router.replace('/login'); return; }
-    if (!session.identity) return;
-    if (!session.identity.emailVerified) { router.replace('/verificar-correo'); return; }
-    let active = true; setError('');
-    async function load() {
-      try {
-        const { profile } = await apiRequest<{ profile: { onboardingCompleted: boolean } | null }>('profile', {}, getFirebaseAuth());
-        if (!active) return; if (!profile?.onboardingCompleted) { router.replace('/onboarding'); return; }
-        const data = await apiRequest<WeeklyReport>(`reports/weekly?weekStart=${week}&timeZone=${encodeURIComponent(zone)}`, {}, getFirebaseAuth());
-        if (active) { setReport(data); setLoaded(`${session.identity!.uid}:${week}`); }
-      } catch (e) { if (active) setError(e instanceof Error ? e.message : 'No pudimos cargar el reporte.'); }
-    }
-    void load(); return () => { active = false; };
-  }, [week, zone, session.loading, session.user, session.identity, retry, router]);
+  const profile = useDashboardProfile();
+  const query = useCachedQuery<WeeklyReport>(`reports/weekly?weekStart=${week}&timeZone=${encodeURIComponent(zone)}`, profile.ready);
+  const report = query.data; const error = profile.error || query.error;
+  function refresh() { if (profile.error || !profile.data) profile.refresh(); query.refresh(); }
   if (session.error) return <div className="dashboard-error"><p role="alert">{session.error}</p><button onClick={() => void session.refresh()}>Reintentar</button></div>;
-  if (!report || session.loading || loaded !== `${session.identity?.uid}:${week}`) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : <DashboardLoading message="Preparando tu reporte semanal…" />;
+  if (!report || !profile.ready || session.loading) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => refresh()}>Reintentar</button></div> : <DashboardLoading message="Preparando tu reporte semanal…" />;
   const { current, previous, period, comparison } = report;
   const text = search.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const filtered = report.logs.filter(log => (!historyDate || log.localDate === historyDate) && (filter === 'all' || filter === log.type) && (!status || log.type === 'training' && log.status === status) && (!text || [log.name, log.type === 'food' ? mealName(log.name) : '', log.note, ...(log.type === 'food' ? log.items.map(item => item.name) : log.type === 'training' ? log.entries.map(entry => entry.name) : ['peso', String(log.weightKg)])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(text)));
   return <div className="dashboard-view reports-page"><div className="dashboard-topbar"><span>Lo que registraste, en perspectiva</span><span className="badge">{period.isPartial ? 'Semana en curso' : 'Semana cerrada'}</span></div>
     <section className="intro"><p className="eyebrow">REPORTES Y REGISTROS</p><h1>Tu semana cuenta.</h1><p className="description">Un resumen de tu entrenamiento, alimentación y peso, con el detalle de cada registro.</p></section>
-    {error && <div className="form-error" role="alert"><p>{error} Se conserva el último reporte cargado.</p><button onClick={() => setRetry(value => value + 1)}>Reintentar</button></div>}
-    <div className="report-toolbar"><div className="week-navigation"><button aria-label="Semana anterior" onClick={() => setWeek(addDays(week, -7))}>←</button><label><span className="sr-only">Elegir fecha de la semana</span><input type="date" value={week} max={period.today} onChange={event => { if (event.target.value) setWeek(monday(event.target.value)); }} /></label><button aria-label="Semana siguiente" disabled={addDays(week, 7) > period.today} onClick={() => setWeek(addDays(week, 7))}>→</button></div><div className="inline-actions"><Link className="primary-button" href="/app/peso">Registrar peso</Link><button onClick={() => setWeek(monday(period.today))}>Esta semana</button><button onClick={() => setRetry(value => value + 1)}>Actualizar</button></div></div>
+    {error && <div className="form-error" role="alert"><p>{error} Se conserva el último reporte cargado.</p><button onClick={() => refresh()}>Reintentar</button></div>}
+    <div className="report-toolbar"><div className="week-navigation"><button aria-label="Semana anterior" onClick={() => setWeek(addDays(week, -7))}>←</button><label><span className="sr-only">Elegir fecha de la semana</span><input type="date" value={week} max={period.today} onChange={event => { if (event.target.value) setWeek(monday(event.target.value)); }} /></label><button aria-label="Semana siguiente" disabled={addDays(week, 7) > period.today} onClick={() => setWeek(addDays(week, 7))}>→</button></div><div className="inline-actions"><Link className="primary-button" href="/app/peso">Registrar peso</Link><button onClick={() => setWeek(monday(period.today))}>Esta semana</button><button onClick={() => refresh()}>Actualizar</button></div></div>
     <p className="report-period">{dateLabel(period.from, { day: 'numeric', month: 'long' })} – {dateLabel(period.to, { day: 'numeric', month: 'long', year: 'numeric' })}{period.isPartial ? ` · Registros hasta el ${dateLabel(period.through)}` : ''}</p>
     <p className="food-hint">Comparación: {dateLabel(previous.from)} – {dateLabel(previous.through)}. {period.isPartial ? 'Comparamos la misma cantidad de días transcurridos, no una semana completa contra una parcial.' : 'Ambos períodos abarcan siete días.'}</p>
     <nav className="training-tabs" aria-label="Vistas del reporte"><button className={tab === 'summary' ? 'selected' : ''} aria-pressed={tab === 'summary'} onClick={() => setTab('summary')}>Resumen semanal</button><button className={tab === 'history' ? 'selected' : ''} aria-pressed={tab === 'history'} onClick={() => setTab('history')}>Historial ({report.logs.length})</button></nav>

@@ -5,15 +5,18 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/provider';
 import { apiRequest } from '@/lib/api/client';
 import { getFirebaseAuth } from '@/lib/firebase/client';
-import { type Profile, goals } from '@/lib/profile';
+import { goals } from '@/lib/profile';
 import Icon from '@/components/ui/Icon';
+import { useCachedQuery } from '@/lib/store/hooks';
+import type { Profile } from '@/lib/profile';
 import DashboardLoading from '@/components/ui/DashboardLoading';
 
 export default function Account({ admin = false }: { admin?: boolean }) {
   const session = useAuth(); const router = useRouter();
   const [adminReady, setAdminReady] = useState(false);
   const [adminError, setAdminError] = useState('');
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const profileQuery = useCachedQuery<{ profile: Profile | null }>('profile', !admin);
+  const profile = profileQuery.data?.profile;
   useEffect(() => {
     if (session.loading) return;
     if (!session.user) { router.replace(admin ? '/admin/login' : '/login'); return; }
@@ -25,15 +28,9 @@ export default function Account({ admin = false }: { admin?: boolean }) {
       apiRequest('admin/session', {}, getFirebaseAuth()).then(() => { if (active) setAdminReady(true); }).catch(() => { if (active) setAdminError('No se pudo validar el acceso administrativo.'); });
       return () => { active = false; };
     }
-    let active = true;
-    apiRequest<{ profile: Profile | null }>('profile', {}, getFirebaseAuth()).then((result) => {
-      if (!active) return;
-      if (!result.profile?.onboardingCompleted) router.replace('/onboarding');
-      else setProfile(result.profile);
-    }).catch(() => { if (active) setAdminError('No se pudo cargar tu perfil.'); });
-    return () => { active = false; };
-  }, [session.loading, session.user, session.identity, admin, router]);
-  if (session.error || adminError) return <div className="dashboard-error"><h1>No pudimos validar tu acceso</h1><p role="alert">{session.error || adminError}</p><button onClick={() => window.location.reload()}>Reintentar</button><button onClick={() => void session.logout()}>Cerrar sesión</button></div>;
+    if (profileQuery.data && !profile?.onboardingCompleted) router.replace('/onboarding');
+  }, [session.loading, session.user, session.identity, admin, router, profileQuery.data, profile]);
+  if (session.error || adminError || profileQuery.error) return <div className="dashboard-error"><h1>No pudimos validar tu acceso</h1><p role="alert">{session.error || adminError || profileQuery.error}</p><button onClick={() => window.location.reload()}>Reintentar</button><button onClick={() => void session.logout()}>Cerrar sesión</button></div>;
   if (session.loading || !session.identity?.emailVerified || (admin && !adminReady) || (!admin && !profile)) return <DashboardLoading />;
   const name = profile?.name || session.user?.displayName || 'bienvenido';
   return <div className="dashboard-view"><div className="dashboard-topbar"><span>{admin ? 'Tu espacio de administración' : 'Tu punto de partida, en perspectiva'}</span><div className="account-chip"><span className="avatar" aria-hidden="true">{name.charAt(0).toUpperCase()}</span><span>{session.identity.email}</span></div></div><section className="intro"><p className="eyebrow">{admin ? 'ADMINISTRACIÓN' : 'MI RESUMEN'}</p><h1>Hola, {name.split(' ')[0]}.</h1><p className="description">{admin ? 'Tu acceso está habilitado. Desde acá construiremos las herramientas para gestionar Formance.' : 'Este es el punto de partida de tu progreso.'}</p></section>

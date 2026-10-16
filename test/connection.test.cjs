@@ -73,3 +73,23 @@ test('Lost write response is never replayed; business errors such as 401 are pre
   await assert.rejects(h.client.apiRequest('auth/me'), error => error.status === 401 && error.message === 'Sesión vencida');
   assert.equal(writes, 1);
 });
+
+test('Switching accounts while waking the backend or obtaining a token never sends the write', async () => {
+  let releaseHealth; let writes = 0;
+  const h = harness(url => {
+    if (url.endsWith('/health')) return new Promise(resolve => { releaseHealth = resolve; });
+    writes++; return Promise.resolve(Response.json({}));
+  });
+  const auth = { currentUser: { uid: 'first', getIdToken: async () => 'first-token' } };
+  const pending = h.client.apiRequest('food/meals', { method: 'POST', body: '{}' }, auth);
+  auth.currentUser = { uid: 'second', getIdToken: async () => 'second-token' };
+  releaseHealth(healthy());
+  await assert.rejects(pending, error => error.status === 401);
+  let releaseToken;
+  auth.currentUser = { uid: 'first', getIdToken: () => new Promise(resolve => { releaseToken = resolve; }) };
+  const tokenPending = h.client.apiRequest('food/meals', { method: 'POST', body: '{}' }, auth);
+  await new Promise(resolve => setImmediate(resolve));
+  auth.currentUser = { uid: 'second', getIdToken: async () => 'second-token' }; releaseToken('first-token');
+  await assert.rejects(tokenPending, error => error.status === 401);
+  assert.equal(writes, 0);
+});

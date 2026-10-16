@@ -1,8 +1,8 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { apiRequest } from "@/lib/api/client";
-import { getFirebaseAuth } from "@/lib/firebase/client";
 import { type Exercise, type WorkoutEntry, type Workout } from "@/lib/training";
+
+import { useApiMutationRequest } from '@/lib/store/hooks';
 
 export default function WorkoutEditor({
   exercises,
@@ -15,6 +15,7 @@ export default function WorkoutEditor({
   onSaved: () => Promise<void>;
   onCancel: () => void;
 }) {
+  const request = useApiMutationRequest();
   const [name, setName] = useState(source?.name || "");
   const [focus, setFocus] = useState(source?.focus || "Cuerpo completo");
   const [entries, setEntries] = useState<WorkoutEntry[]>(source?.exercises.map(({exerciseId,sets,repsMin,repsMax,restSeconds})=>({exerciseId,sets,repsMin,repsMax,restSeconds})) || []);
@@ -34,13 +35,12 @@ export default function WorkoutEditor({
     setBusy(true);
     setError("");
     try {
-      await apiRequest(
+      await request(
         `training/workouts${source ? `/${source.id}` : ''}`,
         {
           method: source ? "PUT" : "POST",
           body: JSON.stringify({ name, focus, exercises: entries, ...(source ? {expectedVersion:source.version}: {}) }),
         },
-        getFirebaseAuth(),
       );
       await onSaved();
     } catch (e) {

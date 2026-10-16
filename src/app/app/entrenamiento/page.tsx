@@ -3,9 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/provider';
-import { apiRequest } from '@/lib/api/client';
-import { getFirebaseAuth } from '@/lib/firebase/client';
-import { goals, type Profile } from '@/lib/profile';
+import { useCachedQuery, useDashboardProfile, useApiMutationRequest } from '@/lib/store/hooks';
+import { goals } from '@/lib/profile';
 import { dayNames, searchText, type Catalog, type Routine, type RoutineTemplate, type Workout, type Exercise } from '@/lib/training';
 import DashboardLoading from '@/components/ui/DashboardLoading';
 import Icon from '@/components/ui/Icon';
@@ -17,12 +16,17 @@ import EntityActions from '@/components/training/EntityActions';
 type Tab = 'templates' | 'mine' | 'workouts' | 'exercises';
 export default function TrainingLibrary() {
   const session = useAuth(); const router = useRouter();
-  const [catalog, setCatalog] = useState<Catalog | null>(null); const [routines, setRoutines] = useState<Routine[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null); const [tab, setTab] = useState<Tab>('templates');
+  const profile = useDashboardProfile();
+  const catalogQuery = useCachedQuery<Catalog>('training/catalog', profile.ready);
+  const routinesQuery = useCachedQuery<{ routines: Routine[]; activeRoutineId: string | null }>('training/routines', profile.ready);
+  const catalog = catalogQuery.data; const routines = routinesQuery.data?.routines || [];
+  const activeId = routinesQuery.data?.activeRoutineId;
+  const request = useApiMutationRequest();
+  const [tab, setTab] = useState<Tab>('templates');
   const [editor, setEditor] = useState<'routine' | 'workout' | 'exercise' | null>(null); const [source, setSource] = useState<Routine | RoutineTemplate | null>(null);
   const [search, setSearch] = useState(''); const [muscle, setMuscle] = useState(''); const [equipment, setEquipment] = useState('');
-  const [goalFilter, setGoalFilter] = useState(''); const [error, setError] = useState(''); const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
-  const [loadedUid, setLoadedUid] = useState<string | null>(null);
+  const [goalFilter, setGoalFilter] = useState(''); const [actionError, setError] = useState('');
+  const error = actionError || profile.error || catalogQuery.error || routinesQuery.error; const [notice, setNotice] = useState(''); const [busy, setBusy] = useState(false);
   const [editingExisting,setEditingExisting] = useState(false);
   const [workoutSource,setWorkoutSource] = useState<Workout | null>(null);
   const [exerciseSource,setExerciseSource] = useState<Exercise | null>(null);
@@ -33,45 +37,22 @@ export default function TrainingLibrary() {
     editorRef.current.focus({ preventScroll: true });
     editorRef.current.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   }, [editor]);
-  async function reload() {
-    const auth = getFirebaseAuth();
-    const uid = auth.currentUser?.uid;
-    const [nextCatalog, own] = await Promise.all([apiRequest<Catalog>('training/catalog', {}, auth), apiRequest<{ routines: Routine[]; activeRoutineId: string | null }>('training/routines', {}, auth)]);
-    if (auth.currentUser?.uid !== uid) return;
-    setCatalog(nextCatalog); setRoutines(own.routines); setActiveId(own.activeRoutineId); setLoadedUid(uid || null);
-  }
-  useEffect(() => {
-    if (session.loading) return;
-    if (!session.user) { router.replace('/login'); return; }
-    if (!session.identity) return;
-    if (!session.identity.emailVerified) { router.replace('/verificar-correo'); return; }
-    let cancelled = false;
-    async function load() {
-      try {
-        const profile = await apiRequest<{ profile: Profile | null }>('profile', {}, getFirebaseAuth());
-        if (cancelled) return;
-        if (!profile.profile?.onboardingCompleted) { router.replace('/onboarding'); return; }
-        await reload();
-      } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : 'No pudimos cargar la biblioteca.'); }
-    }
-    void load(); return () => { cancelled = true; };
-  }, [session.loading, session.user, session.identity, router]);
   async function activate(id: string) {
     setBusy(true); setError('');
-    try { await apiRequest('training/active-routine', { method: 'PUT', body: JSON.stringify({ routineId: id }) }, getFirebaseAuth()); setActiveId(id); router.push('/app/entrenamiento/calendario'); }
+    try { await request('training/active-routine', { method: 'PUT', body: JSON.stringify({ routineId: id }) }); router.push('/app/entrenamiento/calendario'); }
     catch (e) { setError(e instanceof Error ? e.message : 'No pudimos activar la rutina.'); }
     finally { setBusy(false); }
   }
   function edit(value: Routine | RoutineTemplate | null, workoutId?: string, existing = false) { setEditingExisting(existing); setSource(value); setInitialWorkoutId(workoutId); setEditor('routine'); setNotice(''); }
-  async function saved() { await reload(); setEditor(null); setTab(editor === 'routine' ? (source?.visibility === 'public' || (!source && session.identity?.role === 'admin') ? 'templates' : 'mine') : editor === 'exercise' ? 'exercises' : 'workouts'); setNotice(editor === 'routine' ? 'Rutina guardada. Podés activarla desde Mis rutinas.' : editor === 'exercise' ? 'Ejercicio guardado. Ya podés agregarlo a un workout.' : 'Workout guardado. Ya podés asignarlo a tus días.'); }
+  async function saved() { setEditor(null); setTab(editor === 'routine' ? (source?.visibility === 'public' || (!source && session.identity?.role === 'admin') ? 'templates' : 'mine') : editor === 'exercise' ? 'exercises' : 'workouts'); setNotice(editor === 'routine' ? 'Rutina guardada. Podés activarla desde Mis rutinas.' : editor === 'exercise' ? 'Ejercicio guardado. Ya podés agregarlo a un workout.' : 'Workout guardado. Ya podés asignarlo a tus días.'); }
   async function remove(kind: string, item: {id:string;name:string;version:number}) {
     if (!window.confirm(`¿Borrar «${item.name}» de la biblioteca? Sus versiones y referencias históricas se conservarán.`)) return;
     setBusy(true); setError('');
-    try { await apiRequest(`training/${kind}/${item.id}`,{method:'DELETE',body:JSON.stringify({expectedVersion:item.version})},getFirebaseAuth()); await reload(); setNotice('Contenido retirado de la biblioteca.'); }
+    try { await request(`training/${kind}/${item.id}`,{method:'DELETE',body:JSON.stringify({expectedVersion:item.version})}); setNotice('Contenido retirado de la biblioteca.'); }
     catch(e){setError(e instanceof Error?e.message:'No se pudo borrar.');} finally{setBusy(false);}
   }
   if (session.error) return <div className="dashboard-error"><p role="alert">{session.error}</p><button onClick={() => window.location.reload()}>Reintentar</button></div>;
-  if (!catalog || session.loading || !session.identity || loadedUid !== session.identity.uid) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => window.location.reload()}>Reintentar</button></div> : <DashboardLoading message="Preparando tu biblioteca…" />;
+  if (!catalog || !routinesQuery.data || !profile.ready || session.loading || !session.identity) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => window.location.reload()}>Reintentar</button></div> : <DashboardLoading message="Preparando tu biblioteca…" />;
   const goalName = goals.find(([value]) => value === catalog.userGoal)?.[1];
   const visibleExercises = catalog.exercises.filter((e) => (!muscle || e.muscle === muscle) && (!equipment || e.equipment === equipment) && searchText(`${e.name} ${e.muscle} ${e.equipment}`).includes(searchText(search)));
   const visibleWorkouts = catalog.workouts.filter((w) => searchText(`${w.name} ${w.focus}`).includes(searchText(search)));

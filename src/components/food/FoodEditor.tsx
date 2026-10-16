@@ -4,7 +4,10 @@ import { apiRequest, ApiError } from '@/lib/api/client';
 import { getFirebaseAuth } from '@/lib/firebase/client';
 import { mealTypes, nutrientKeys, nutrientLabels, itemTotals, formatNumber, compressedPhoto, type Food, type FoodItem, type Meal, type FoodCapabilities } from '@/lib/food';
 
+import { useApiMutationRequest } from '@/lib/store/hooks';
+
 export default function FoodEditor({ initial, copying = false, date, capabilities, onSaved, onClose }: { initial: Meal | null; copying?: boolean; date: string; capabilities: FoodCapabilities; onSaved: () => Promise<void>; onClose: () => void }) {
+  const request = useApiMutationRequest();
   const [mode, setMode] = useState<'manual' | 'search' | 'photo'>('manual');
   const [items, setItems] = useState<FoodItem[]>(() => initial?.items.map(item => ({ ...item })) || []);
   const [mealType, setMealType] = useState(initial?.mealType || 'lunch'); const [note, setNote] = useState(initial?.note || '');
@@ -43,7 +46,7 @@ export default function FoodEditor({ initial, copying = false, date, capabilitie
     setSaving(true); setError('');
     const payload = { mealId: mealId.current, localDate: date, timeZone: initial && !copying ? initial.timeZone : Intl.DateTimeFormat().resolvedOptions().timeZone, mealType, note,
       items: items.map(item => item.source === 'usda' ? { itemId: item.itemId, source: item.source, foodId: item.foodId, grams: item.grams } : { itemId: item.itemId, source: item.source, name: item.name, grams: item.grams, basis: item.basis, nutrients: item.nutrients, ...(item.source === 'gemini' ? { analysisId: item.analysisId } : {}) }), ...(persistedVersion.current !== null ? { expectedVersion: persistedVersion.current } : {}) };
-    try { const result = await apiRequest<{ meal: Meal }>(`food/meals${persistedVersion.current !== null ? `/${mealId.current}` : ''}`, { method: persistedVersion.current !== null ? 'PUT' : 'POST', body: JSON.stringify(payload) }, getFirebaseAuth()); persistedVersion.current = result.meal.version; setDirty(false); await onSaved(); }
+    try { const result = await request<{ meal: Meal }>(`food/meals${persistedVersion.current !== null ? `/${mealId.current}` : ''}`, { method: persistedVersion.current !== null ? 'PUT' : 'POST', body: JSON.stringify(payload) }); persistedVersion.current = result.meal.version; setDirty(false); await onSaved(); }
     catch (e) { setError(e instanceof Error ? e.message : 'No pudimos guardar la comida.'); if (e instanceof ApiError && e.status === 409) setConflict(true); } finally { setSaving(false); }
   }
   function editItem(index: number, update: Partial<FoodItem>) { setItems(rows => rows.map((item, i) => i === index ? { ...item, ...update } : item)); setDirty(true); }

@@ -1,11 +1,12 @@
 'use client';
 import { useState, type FormEvent } from 'react';
-import { apiRequest } from '@/lib/api/client';
-import { getFirebaseAuth } from '@/lib/firebase/client';
 import { goals as goalOptions } from '@/lib/profile';
 import { dayNames, emptyWeek, type RoutineDay, type Routine, type RoutineTemplate, type Workout } from '@/lib/training';
 
+import { useApiMutationRequest } from '@/lib/store/hooks';
+
 export default function RoutineEditor({ source, workouts, initialWorkoutId, editing = false, onSaved, onCancel }: { source: Routine | RoutineTemplate | null; workouts: Workout[]; initialWorkoutId?: string; editing?: boolean; onSaved: () => Promise<void>; onCancel: () => void }) {
+  const request = useApiMutationRequest();
   const [name, setName] = useState(source ? `${source.name}${editing ? '' : ' · mi versión'}` : '');
   const [days, setDays] = useState<RoutineDay[]>(source ? source.days.map((d) => ({ dayIndex: d.dayIndex, workoutIds: [...d.workoutIds] })) : emptyWeek().map((d) => ({ ...d, workoutIds: d.dayIndex === 0 && initialWorkoutId ? [initialWorkoutId] : [] })));
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
@@ -16,7 +17,7 @@ export default function RoutineEditor({ source, workouts, initialWorkoutId, edit
     event.preventDefault(); setBusy(true); setError('');
     const payload = { name, days, ...metadata, goals:selectedGoals, sourceTemplateId: source ? (editing ? source.sourceTemplateId : source.id) : null, ...(editing && source ? { expectedVersion: source.version } : {}) };
     try {
-      await apiRequest(`training/routines${editing && source ? `/${source.id}` : ''}`, { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) }, getFirebaseAuth());
+      await request(`training/routines${editing && source ? `/${source.id}` : ''}`, { method: editing ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       await onSaved();
     } catch (e) { setError(e instanceof Error ? e.message : 'No pudimos guardar la rutina.'); }
     finally { setBusy(false); }

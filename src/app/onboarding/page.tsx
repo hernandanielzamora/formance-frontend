@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/provider';
 import { getFirebaseAuth } from '@/lib/firebase/client';
 import { apiRequest } from '@/lib/api/client';
+import { useCachedQuery, useApiMutationRequest } from '@/lib/store/hooks';
 import { activities, goals, type Profile, type Targets } from '@/lib/profile';
 
 export default function Onboarding() {
@@ -12,6 +13,8 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const [draft, setDraft] = useState({ name: '', age: '', sex: '', heightCm: '', initialWeightKg: '', activity: '', goal: '' });
   const [targets, setTargets] = useState<Targets | null>(null);
+  const profileQuery = useCachedQuery<{ profile: Profile | null }>('profile');
+  const request = useApiMutationRequest();
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (ready) titleRef.current?.focus(); }, [step, ready]);
   useEffect(() => {
@@ -19,14 +22,10 @@ export default function Onboarding() {
     if (!session.user) { router.replace('/login'); return; }
     if (!session.identity) return;
     if (!session.identity.emailVerified) { router.replace('/verificar-correo'); return; }
-    let active = true;
-    apiRequest<{ profile: Profile | null }>('profile', {}, getFirebaseAuth()).then(({ profile }) => {
-      if (!active) return;
-      if (profile?.onboardingCompleted) { router.replace('/app'); return; }
-      setDraft((d) => ({ ...d, name: session.user?.displayName || '' })); setReady(true);
-    }).catch(() => { if (active) setError('No pudimos cargar tu perfil. Recargá la página para reintentar.'); });
-    return () => { active = false; };
-  }, [session.loading, session.user, session.identity, router]);
+    if (!profileQuery.data) return;
+    if (profileQuery.data.profile?.onboardingCompleted) { router.replace('/app'); return; }
+    if (!ready) { setDraft(d => ({ ...d, name: session.user?.displayName || '' })); setReady(true); }
+  }, [session.loading, session.user, session.identity, router, profileQuery.data, ready]);
   function field(key: keyof typeof draft, value: string) { setDraft((d) => ({ ...d, [key]: value })); }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError('');
@@ -38,13 +37,13 @@ export default function Onboarding() {
         const result = await apiRequest<Targets>('profile/onboarding/preview', { method: 'POST', body: JSON.stringify(personal) }, getFirebaseAuth());
         setTargets({ calories: result.calories, protein: result.protein, fat: result.fat, carbohydrates: result.carbohydrates }); setStep(3);
       } else {
-        await apiRequest('profile/onboarding', { method: 'PUT', body: JSON.stringify({ ...personal, targets }) }, getFirebaseAuth());
+        await request('profile/onboarding', { method: 'PUT', body: JSON.stringify({ ...personal, targets }) });
         router.replace('/app');
       }
     } catch (e) { setError(e instanceof Error ? e.message : 'No pudimos guardar tu perfil.'); }
     finally { setBusy(false); }
   }
-  if (session.error || (!ready && error)) return <main className="container"><p role="alert">{error || session.error}</p><button onClick={() => window.location.reload()}>Reintentar</button><button onClick={() => void session.logout()}>Cerrar sesión</button></main>;
+  if (session.error || (!ready && (error || profileQuery.error))) return <main className="container"><p role="alert">{error || profileQuery.error || session.error}</p><button onClick={() => window.location.reload()}>Reintentar</button><button onClick={() => void session.logout()}>Cerrar sesión</button></main>;
   if (!ready) return <main className="container"><p role="status">Cargando tu perfil…</p></main>;
   const titles = ['Conozcamos tu punto de partida', '¿Cómo es tu actividad habitual?', '¿Qué querés lograr?', 'Tu referencia inicial'];
   return <main className="container onboarding"><header><img src="/brand/formance.svg" width="230" height="48" alt="Formance" /><button onClick={() => void session.logout()}>Cerrar sesión</button></header><section className="onboarding-card"><p className="eyebrow">PASO {step + 1} DE 4</p><div className="step-track" aria-label={`Paso ${step + 1} de 4`}>{titles.map((_, index) => <span key={index} className={index <= step ? 'active' : ''} />)}</div><div className="step-labels">{['Sobre vos', 'Actividad', 'Objetivo', 'Referencia'].map((label, index) => <span key={label} className={index === step ? 'active' : ''} aria-current={index === step ? 'step' : undefined}>{label}</span>)}</div><h1 ref={titleRef} tabIndex={-1}>{titles[step]}</h1><form onSubmit={submit} aria-busy={busy}>

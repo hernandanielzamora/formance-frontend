@@ -1,10 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/provider';
-import { apiRequest } from '@/lib/api/client';
-import { getFirebaseAuth } from '@/lib/firebase/client';
+import { useCachedQuery, useDashboardProfile, useApiMutationRequest } from '@/lib/store/hooks';
 import { dayNames } from '@/lib/training';
 import { addDays, monday, localDate, dateLabel, sessionStatus, type TrainingCalendar, type TrainingSession } from '@/lib/training-sessions';
 import DashboardLoading from '@/components/ui/DashboardLoading';
@@ -13,18 +11,21 @@ import WorkoutPreview from '@/components/training/WorkoutPreview';
 import Icon from '@/components/ui/Icon';
 
 export default function CalendarPage() {
-  const auth = useAuth(); const router = useRouter();
+  const auth = useAuth();
   const [week, setWeek] = useState(() => monday(localDate()));
   const [selected, setSelected] = useState(localDate);
-  const [calendar, setCalendar] = useState<TrainingCalendar | null>(null);
-  const [loadedWeek, setLoadedWeek] = useState('');
-  const [loadedUid, setLoadedUid] = useState<string | null>(null);
   const [zone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
+  const [actionError, setError] = useState(''); const [busy, setBusy] = useState(false);
   const [session, setSession] = useState<TrainingSession | null>(null);
-  const [retry, setRetry] = useState(0);
+
   const pendingStart = useRef<{ key: string; id: string } | null>(null);
   const weekRef = useRef<HTMLDivElement>(null);
+  const profile = useDashboardProfile();
+  const query = useCachedQuery<TrainingCalendar>(`training/calendar?from=${week}&to=${addDays(week, 6)}&timeZone=${encodeURIComponent(zone)}`, profile.ready);
+  const calendar = query.data;
+  const error = actionError || profile.error || query.error;
+  const request = useApiMutationRequest();
+  function refresh() { setError(''); if (profile.error || !profile.data) profile.refresh(); query.refresh(); }
   useEffect(() => { setSession(null); pendingStart.current = null; }, [auth.user?.uid]);
   useEffect(() => {
     const row = weekRef.current;
@@ -33,51 +34,32 @@ export default function CalendarPage() {
     const left = day.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft - (row.clientWidth - day.offsetWidth) / 2;
     row.scrollTo({ left: Math.max(0, left), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   }, [selected, session, calendar]);
-  useEffect(() => {
-    if (auth.loading) return;
-    if (!auth.user) { router.replace('/login'); return; }
-    if (!auth.identity) return;
-    if (!auth.identity.emailVerified) { router.replace('/verificar-correo'); return; }
-    let cancelled = false; setError('');
-    async function load() {
-      try {
-        const { profile } = await apiRequest<{ profile: { onboardingCompleted: boolean } | null }>('profile', {}, getFirebaseAuth());
-        if (cancelled) return;
-        if (!profile?.onboardingCompleted) { router.replace('/onboarding'); return; }
-        const result = await apiRequest<TrainingCalendar>(`training/calendar?from=${week}&to=${addDays(week, 6)}&timeZone=${encodeURIComponent(zone)}`, {}, getFirebaseAuth());
-        if (!cancelled) { setCalendar(result); setLoadedWeek(week); setLoadedUid(auth.identity!.uid); }
-      } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : 'No pudimos cargar tu calendario.'); }
-    }
-    void load(); return () => { cancelled = true; };
-  }, [auth.loading, auth.user, auth.identity, week, zone, router, retry]);
   function changeWeek(offset: number) { const next = addDays(week, offset); setWeek(next); setSelected(next); }
-  function saved(value: TrainingSession) {
-    setCalendar(current => current ? { ...current, sessions: [...current.sessions.filter(item => item.id !== value.id), value] } : current);
-  }
+  function saved(value: TrainingSession) { setSession(value); }
   async function start(assignmentId: string) {
     if (!calendar?.routine) return;
     setBusy(true); setError('');
     const key = `${calendar.routine.id}:${calendar.routine.version}:${assignmentId}:${selected}`;
     if (pendingStart.current?.key !== key) pendingStart.current = { key, id: crypto.randomUUID() };
     try {
-      const result = await apiRequest<{ session: TrainingSession }>('training/sessions', { method: 'POST', body: JSON.stringify({ sessionId: pendingStart.current.id, routineId: calendar.routine.id, routineVersion: calendar.routine.version, assignmentId, localDate: selected, timeZone: zone }) }, getFirebaseAuth());
-      pendingStart.current = null; saved(result.session); setSession(result.session); window.scrollTo({ top: 0, behavior: 'instant' });
+      const result = await request<{ session: TrainingSession }>('training/sessions', { method: 'POST', body: JSON.stringify({ sessionId: pendingStart.current.id, routineId: calendar.routine.id, routineVersion: calendar.routine.version, assignmentId, localDate: selected, timeZone: zone }) });
+      pendingStart.current = null; saved(result.session); window.scrollTo({ top: 0, behavior: 'instant' });
     } catch (e) { setError(e instanceof Error ? e.message : 'No pudimos iniciar el registro.'); }
     finally { setBusy(false); }
   }
   if (auth.error) return <div className="dashboard-error"><p role="alert">{auth.error}</p><button onClick={() => void auth.refresh()}>Reintentar</button></div>;
-  if (!calendar || auth.loading || !auth.identity || loadedUid !== auth.identity.uid) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => setRetry(value => value + 1)}>Reintentar</button></div> : <DashboardLoading message="Preparando tu calendario…" />;
+  if (!calendar || !profile.ready || auth.loading || !auth.identity) return error ? <div className="dashboard-error"><p role="alert">{error}</p><button onClick={() => refresh()}>Reintentar</button></div> : <DashboardLoading message="Preparando tu calendario…" />;
   const days = Array.from({ length: 7 }, (_, index) => addDays(week, index));
   const dayIndex = (new Date(`${selected}T12:00:00Z`).getUTCDay() + 6) % 7;
   const assignments = calendar.routine?.days[dayIndex]?.assignments || [];
   const dailySessions = calendar.sessions.filter(item => item.localDate === selected);
-  const loading = loadedWeek !== week;
+  const loading = query.isFetching && !query.data;
   return <div className="dashboard-view calendar-page">
     <div className="dashboard-topbar"><Link className="text-link" href="/app/entrenamiento">← Biblioteca</Link><span>{session ? sessionStatus[session.status] : calendar.routine?.name || 'Mi calendario'}</span></div>
     {session ? <SessionRecorder key={session.id} initial={session} onSaved={saved} onClose={() => { setSession(null); window.scrollTo({ top: 0, behavior: 'instant' }); }} /> : <>
       <section className="intro"><p className="eyebrow">MI ENTRENAMIENTO</p><h1>Tu semana, a la vista.</h1><p className="description">{calendar.routine ? `Distribución de tu rutina activa: ${calendar.routine.name}.` : 'Elegí una rutina activa para ver tus días de entrenamiento y descanso.'}</p></section>
       <div className="calendar-toolbar"><div className="week-navigation"><button aria-label="Semana anterior" onClick={() => changeWeek(-7)}>←</button><h2>{dateLabel(week)} – {dateLabel(addDays(week, 6), { day: 'numeric', month: 'short', year: 'numeric' })}</h2><button aria-label="Semana siguiente" onClick={() => changeWeek(7)}>→</button></div><button onClick={() => { setWeek(monday(calendar.today)); setSelected(calendar.today); }}>Hoy</button></div>
-      {error && <p role="alert" className="form-error">{error}<button onClick={() => setRetry(value => value + 1)}>Actualizar calendario</button></p>}
+      {error && <p role="alert" className="form-error">{error}<button onClick={() => refresh()}>Actualizar calendario</button></p>}
       <div ref={weekRef} className="calendar-week" aria-label="Días de la semana" aria-busy={loading}>{days.map((day, index) => {
         const planned = calendar.routine?.days[index]?.assignments || [];
         const logs = loading ? [] : calendar.sessions.filter(item => item.localDate === day);

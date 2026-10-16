@@ -1,5 +1,23 @@
 # Formance · Frontend
 
+## Conexión al backend gratuito
+
+Al abrir la app se comprueba `/api/health`. Si el servicio está arrancando, las
+peticiones esperan una comprobación compartida de hasta 90 segundos; después
+de 1,5 segundos aparece un aviso sin desplazar el contenido. Si falla, se ofrece
+reintentar; la validación de sesión pendiente se retoma al recuperar la conexión.
+La comprobación se reutiliza durante 30 segundos y se renueva solo al usar la app.
+No hay pings periódicos para mantener Render despierto.
+
+Solo se repite el health check: las escrituras y análisis de fotos nunca se
+reenvían automáticamente. Si una escritura pierde la respuesta, se pide consultar
+el historial antes de volver a guardar. Las señales de cancelación se respetan
+sin cancelar la conexión compartida de otras pantallas.
+
+Esto mejora el arranque, pero no elimina la suspensión del plan gratuito. Para una
+demo, abrir la app un minuto antes permite completar la primera conexión.
+`npm.cmd test` verifica recuperación, límites de espera, concurrencia y escrituras.
+
 ## Reportes
 
 `/app/reportes`: resumen semanal con comparación del mismo período anterior,

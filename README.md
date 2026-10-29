@@ -3,6 +3,9 @@
 Reportes incluye análisis semanal manual con IA, separado del resumen calculado:
 [comportamiento, estados y caché](docs/weekly-ai-analysis.md).
 
+[Lectura ampliada de la semana](docs/weekly-ai-insights.md): comparación anterior,
+entrenamiento, alimentación, peso y foco para el próximo seguimiento.
+
 E4: [capturas, reproducción y mapeo académico](docs/e4/SCREENSHOTS_E4.md),
 [variables por entorno](docs/e4/ENVIRONMENT.md). Playwright vive en `e2e/e4`
 como herramienta aislada; no se incluye en las dependencias de producción.

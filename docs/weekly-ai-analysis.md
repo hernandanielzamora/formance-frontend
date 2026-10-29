@@ -1,5 +1,8 @@
 # Reportes: análisis semanal manual
 
+La [lectura ampliada v2](weekly-ai-insights.md) agrega comparación, tres áreas y
+foco de seguimiento a los bloques originales descritos en este documento.
+
 `/app/reportes` incluye `components/reports/WeeklyAnalysis.tsx` separado de métricas
 y del historial. La generación solo se inicia al pulsar “Analizar semana con IA”.
 Muestra estado inicial, carga, error, límite y resultado con Resumen, Tendencias y

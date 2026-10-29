@@ -1,0 +1,105 @@
+/* Screenshot-only composition. No data or generated text is changed.
+   The app stylesheet remains the source of fonts, colors and components. */
+html { scroll-behavior: auto !important; }
+.dashboard-content { padding-top:24px !important; }
+.dashboard-view > .intro { margin-block:14px !important; padding-block:8px !important; }
+.dashboard-topbar { padding-bottom:12px !important; }
+.intro h1 { font-size:38px !important; }
+.intro .description { font-size:15px !important; }
+.session-recorder form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.session-recorder .logged-exercise { margin:0; padding:14px; }
+.session-recorder .logged-set { padding-block:3px; }
+.session-recorder .logged-set input[type=number] { height:34px; min-height:34px; padding:6px 10px; }
+.session-recorder .set-prescription { font-size:12px; margin-block:8px; }
+.session-recorder form > label,.session-recorder form > .save-state { grid-column:1/-1; }
+.session-recorder form > label textarea { height:60px; min-height:60px; }
+.food-meal-groups { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:12px !important; }
+.food-meal-groups > section { min-width:0; }
+.food-meal-card { padding:14px !important; }
+.food-meal-card li { align-items:start !important; flex-direction:column; gap:3px !important; font-size:13px; }
+.food-meal-card li small { font-size:11px; }
+.food-meal-card .library-actions { flex-wrap:wrap; gap:4px; }
+.food-meal-card button { min-height:30px; padding:6px 9px; font-size:11px; }
+.food-meal-card > p { font-size:11px; }
+.reports-page { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px 22px; align-items:start; }
+.reports-page > .dashboard-topbar,.reports-page > .intro,.reports-page > .report-toolbar,
+.reports-page > .report-period,.reports-page > .food-hint,.reports-page > .training-tabs { grid-column:1/-1; margin-block:0 !important; }
+.reports-page > .intro { margin-block:8px !important; }
+.reports-page > .intro h1 { margin-block:5px !important; }
+.reports-page > .intro .description { margin-block:6px !important; }
+.reports-page > .training-tabs { display:none; }
+.reports-page > .weekly-analysis { grid-column:2; grid-row:6 / span 3; padding:18px; margin:0; }
+.reports-page > .weekly-analysis h2 { font-size:21px; }
+.reports-page > .weekly-analysis p,.reports-page > .weekly-analysis li { font-size:13px; line-height:1.4; }
+.reports-page > .weekly-analysis h3 { font-size:16px; margin-top:14px; }
+.reports-page > .weekly-analysis .weekly-analysis-result { margin-top:12px; }
+.reports-page > .weekly-analysis .food-hint { font-size:11px; line-height:1.35; }
+.reports-page > .weekly-analysis button { min-height:36px; padding:9px 14px; font-size:12px; }
+.reports-page > .report-weight { grid-column:1; grid-row:6; padding:15px; margin:0; }
+.reports-page > .report-weight > .food-hint { font-size:10px; }
+.reports-page > .report-weight .weight-chart { padding:8px; margin-block:10px; }
+.reports-page > .report-weight .weight-chart svg { height:105px; min-height:105px; }
+.reports-page > .report-weight .weight-chart p { font-size:10px; margin-block:4px; }
+.reports-page > .report-weight .weight-metrics { gap:8px; margin-block:10px; }
+.reports-page > .report-weight .weight-metrics article { padding:10px; }
+.reports-page > .report-weight .weight-metrics h2 { font-size:11px; min-height:30px; }
+.reports-page > .report-weight .weight-metrics strong { font-size:22px; }
+.reports-page > .report-weight .weight-metrics p,.reports-page > .report-weight .weight-metrics small { font-size:10px; }
+.reports-page > .report-metrics { grid-column:1; grid-row:7; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:0; }
+.reports-page > .report-metrics article { padding:12px; }
+.reports-page > .report-metrics h2 { font-size:13px; }
+.reports-page > .report-metrics strong { font-size:26px; }
+.reports-page > .report-metrics p,.reports-page > .report-metrics small { font-size:11px; }
+.reports-page > .report-section:not(.weekly-analysis):not(.report-weight),.reports-page > .report-data-note { grid-column:1/-1; }
+.reports-page { gap:10px 22px; }
+.reports-page > .intro .eyebrow { margin-block:4px; }
+.reports-page > .intro .description { max-width:none; }
+.reports-page > .weekly-analysis p,.reports-page > .weekly-analysis li { font-size:12px; line-height:1.35; }
+.reports-page > .weekly-analysis li { margin-block:6px; }
+.reports-page > .weekly-analysis h3 { margin-block:10px 6px; }
+.reports-page > .weekly-analysis > p { margin-block:8px; }
+.reports-page > .report-weight .weight-metrics h2 { margin-bottom:6px; }
+.reports-page > .report-weight .weight-chart svg { height:90px; min-height:90px; }
+.reports-page > .report-weight .weight-chart .food-hint { display:none; }
+.reports-page > .report-metrics h2 { min-height:30px; margin-bottom:6px; }
+.reports-page > .report-metrics p,.reports-page > .report-metrics small { margin-block:5px; line-height:1.35; }
+.weight-page .weight-chart { padding:14px 22px; margin-block:14px; }
+.weight-page .weight-chart svg { height:210px; min-height:210px; }
+.weight-page .weight-metrics article { padding:18px 22px; }
+.weight-page .weight-metrics h2 { min-height:30px; margin-bottom:10px; }
+.weight-page .weight-history { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:12px; }
+.weight-page .weight-history article { padding:14px; }
+.weight-page .weight-history h3 { font-size:18px; }
+.weight-page .weight-history button { padding:8px 12px; min-height:34px; }
+.food-page .intro h1 { margin-block:12px; }
+.food-page .intro .description { max-width:none; margin-block:12px; }
+.food-page .food-meal-groups { margin-top:15px; }
+.food-page .food-meal-groups h2 { margin-block:10px; font-size:19px; }
+.food-page .food-meal-card li { padding-block:7px; }
+.food-page .food-daily-totals article { padding:16px; }
+.food-page .food-meal-groups { grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,2fr) !important; }
+.food-page .food-meal-groups > section:last-child ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 12px; }
+.food-page .food-meal-card button { white-space:nowrap; }
+.reports-page > .dashboard-topbar,.reports-page > .intro .description { display:none; }
+.reports-page > .intro { margin:0 !important; padding:0 !important; }
+.reports-page > .intro h1 { font-size:30px !important; margin-block:4px !important; }
+.reports-page { gap:6px 22px; }
+.reports-page .report-toolbar button,.reports-page .report-toolbar a,.reports-page .report-toolbar input { min-height:36px; padding:8px 12px; }
+.weight-page .weight-history article:nth-child(n+3) { visibility:hidden; }
+.food-page > .intro { margin-block:8px !important; padding-block:0 !important; }
+.food-page .intro h1 { font-size:32px !important; margin-block:8px; }
+.food-page .intro .description { font-size:13px !important; margin-block:8px; }
+.food-page .food-daily-totals h2 { margin-bottom:8px; }
+.food-page .food-daily-totals p { margin-block:8px; }
+.reports-page > .intro { grid-row:1; }
+.reports-page > .report-toolbar { grid-row:2; }
+.reports-page > .report-period { grid-row:3; }
+.reports-page > .food-hint { grid-row:4; }
+.reports-page > .weekly-analysis { grid-row:5 / span 2; }
+.reports-page > .report-weight { grid-row:5; }
+.reports-page > .report-metrics { grid-row:6; }
+.reports-page > .report-metrics article { padding:10px; }
+.reports-page > .report-metrics h2 { min-height:0; margin-bottom:4px; font-size:12px; }
+.reports-page > .report-metrics strong { font-size:24px; }
+.reports-page > .report-metrics p,.reports-page > .report-metrics small { font-size:10px; margin-block:3px; line-height:1.25; }
+.dashboard-content:has(.account-chip) > .professional-care-notice { display:none; }

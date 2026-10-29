@@ -1,0 +1,28 @@
+{
+  "frontend": {
+    "NEXT_PUBLIC_API_URL": true,
+    "NEXT_PUBLIC_FIREBASE_API_KEY": true,
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": true,
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": true,
+    "NEXT_PUBLIC_FIREBASE_APP_ID": true
+  },
+  "backend": {
+    "NODE_ENV": true,
+    "PORT": true,
+    "FRONTEND_ORIGIN": true,
+    "FIREBASE_PROJECT_ID": true,
+    "GOOGLE_APPLICATION_CREDENTIALS": true,
+    "USDA_API_KEY": true,
+    "GEMINI_API_KEY": true,
+    "GEMINI_MODEL": true,
+    "FOOD_AI_USER_DAILY_LIMIT": true,
+    "FOOD_AI_GLOBAL_DAILY_LIMIT": true,
+    "FOOD_AI_GLOBAL_MINUTE_LIMIT": true,
+    "WEEKLY_AI_USER_WEEKLY_LIMIT": false,
+    "WEEKLY_AI_GLOBAL_DAILY_LIMIT": false,
+    "WEEKLY_AI_GLOBAL_MINUTE_LIMIT": false
+  },
+  "sameFirebaseProject": true,
+  "corsMatchesLocalFrontend": true,
+  "backendURLMatchesLocal": true
+}

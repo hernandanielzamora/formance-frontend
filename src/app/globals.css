@@ -536,3 +536,10 @@ input,select,textarea { min-width:0; }
 @media(max-width:800px) { .weight-metrics { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); } }
 @media(max-width:580px) { .weight-range label { max-width:none; min-width:0; flex-basis:calc(50% - 8px); } .weight-range .inline-actions { width:100%; } .weight-metrics { grid-template-columns:1fr; } .weight-metrics h2 { min-height:0; } .weight-chart { padding:20px 12px; } .weight-history>article { flex-direction:column; align-items:stretch; padding:20px; } .weight-history .inline-actions button { flex:1; } .weight-chart svg { min-height:170px; } }
 @media(max-width:580px) { .vision-copy li { display:grid; grid-template-columns:24px minmax(0,1fr); align-items:start; } .vision-copy .feature-link { grid-column:2; justify-self:start; } }
+/* Weekly interpretation remains separate from deterministic report metrics. */
+.weekly-analysis { border: 1px solid #dce3d3; border-radius: 18px; padding: 24px; }
+.weekly-analysis > p { margin-block: 12px; }
+.weekly-analysis-result { margin-top: 20px; max-width: 80ch; overflow-wrap: anywhere; }
+.weekly-analysis-result h3 { margin-top: 18px; }
+.weekly-analysis-result ul { padding-left: 24px; }
+.weekly-analysis-result li { margin-block: 8px; }

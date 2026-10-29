@@ -1,5 +1,12 @@
 # Formance · Frontend
 
+Reportes incluye análisis semanal manual con IA, separado del resumen calculado:
+[comportamiento, estados y caché](docs/weekly-ai-analysis.md).
+
+E4: [capturas, reproducción y mapeo académico](docs/e4/SCREENSHOTS_E4.md),
+[variables por entorno](docs/e4/ENVIRONMENT.md). Playwright vive en `e2e/e4`
+como herramienta aislada; no se incluye en las dependencias de producción.
+
 El inicio y las pantallas internas incluyen un aviso permanente sobre el alcance de
 la herramienta: Formance no reemplaza la evaluación ni atención profesional de
 nutricionistas, kinesiólogos, médicos o profesionales del entrenamiento.
@@ -30,7 +37,8 @@ demo, abrir la app un minuto antes permite completar la primera conexión.
 `/app/reportes`: resumen semanal con comparación del mismo período anterior,
 sesiones/series/carga externa, nutrición, peso y completitud. Historial filtrable por
 día, tipo, estado y texto con detalle de series, comidas y mediciones. No realiza llamadas
-a IA. La interpretación de la semana mediante IA queda pendiente.
+a IA para calcular métricas. La sección separada “Análisis de la semana con IA”
+interpreta el resumen al pulsar el botón; utiliza caché y cuotas propias.
 
 `/app/peso`: registro diario en kg, edición y archivo, nota opcional, gráfico
 interactivo e historial por fechas. Conserva el peso inicial del onboarding.
@@ -72,7 +80,8 @@ El onboarding `/onboarding` adapta el recorrido de Nutrivo: datos personales (cm
 actividad, objetivo y revisión editable de calorías/macros. Se guarda mediante la API;
 al acceder a `/app`, las cuentas sin perfil completo se dirigen al onboarding.
 El admin entra a `/admin` y puede abrir su perfil personal para completar el mismo recorrido.
-Las herramientas de gestión se implementarán en los siguientes commits.
+La biblioteca compartida permite gestionar contenido según propietario/rol;
+no hay un dashboard profesional ni gestión integral de usuarios.
 El logotipo de Formance se reutiliza del proyecto original.
 
 ## Diseño y experiencia
@@ -123,7 +132,7 @@ jamás colocar una cuenta de servicio, clave privada o clave de IA allí.
 
 El SDK se inicializa bajo demanda y el proyecto puede compilar sin Firebase configurado.
 `/setup` comprueba la API e inicializa el SDK, pero NO acredita una conexión remota a Firebase.
-Para eso ejecutar `npm.cmd run check:firebase` en el backend. El login real se implementará
+Para eso ejecutar `npm.cmd run check:firebase` en el backend. El login real se realiza
 mediante la UI de registro/login. Google y Correo/Contraseña deben estar habilitados
 en Authentication. El acceso admin requiere un custom claim establecido desde Firebase Admin.
 
@@ -139,7 +148,8 @@ npm.cmd run build
 npm.cmd run typecheck
 ```
 
-No se incorporan Redux, servicios de Nutrivo, pagos ni IA en esta base.
+El estado remoto usa Redux Toolkit/RTK Query. La IA se limita a fotos de comidas
+y a la interpretación semanal manual; no se incorporan pagos ni servicios de Nutrivo.
 Variables locales y archivos privados se excluyen de Git. Versionar `package-lock.json`.
 Repositorio independiente: https://github.com/hernandanielzamora/formance-frontend.
 La base inicial se registra en `main`; `dev` será la rama de integración y cada feature

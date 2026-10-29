@@ -14,3 +14,6 @@ credentials/
 next-env.d.ts
 *.log
 .DS_Store
+.auth/
+playwright-report/
+test-results/

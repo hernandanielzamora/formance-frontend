@@ -1,0 +1,11 @@
+{
+  "name": "formance-e4-tools",
+  "private": true,
+  "scripts": {
+    "login": "node login.cjs",
+    "test": "playwright test --config=playwright.config.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

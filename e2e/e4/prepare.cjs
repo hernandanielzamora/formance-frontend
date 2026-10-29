@@ -1,0 +1,120 @@
+const { chromium, expect } = require('@playwright/test');
+const fs = require('node:fs');
+const path = require('node:path');
+const { root, baseURL, authFile, week, zone } = require('./settings.cjs');
+const { connect, ready, calendarWeek, receiptFile, digest } = require('./helpers.cjs');
+const marker = '[DEMO SIMULADA E4]';
+const shift = (date, days) => new Date(new Date(`${date}T12:00:00Z`).getTime() + days * 86400000).toISOString().slice(0, 10);
+(async () => {
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const progress = fs.existsSync(receiptFile) ? JSON.parse(fs.readFileSync(receiptFile, 'utf8')) : { week, newPhotoGenerations: 0, newWeeklyGenerations: 0 };
+  const save = () => fs.writeFileSync(receiptFile, JSON.stringify(progress, null, 2));
+  try {
+    const context = await browser.newContext({ baseURL, storageState: authFile, timezoneId: zone, viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage(); const api = connect(page);
+    await page.goto(`${baseURL}/app`); await ready(page);
+    await expect(page.getByRole('heading', { name: 'Objetivo diario', exact: true })).toBeVisible();
+    console.log('Login/perfil real: OK');
+    const calendar = await api(`training/calendar?from=${week}&to=${shift(week, 6)}&timeZone=${encodeURIComponent(zone)}`);
+    if (!calendar.routine) throw new Error('Falta rutina activa; no se cambiará una elección existente.');
+    const dayIndex = calendar.routine.days.findIndex(day => day.assignments?.length);
+    progress.trainingDate = shift(week, dayIndex);
+    if (!calendar.sessions.some(session => session.note?.includes(marker))) {
+      await calendarWeek(page);
+      await page.locator('.calendar-day').nth(dayIndex).click();
+      const start = page.waitForResponse(r => r.url().endsWith('/api/training/sessions') && r.request().method() === 'POST');
+      await page.getByRole('button', { name: /Registrar (otra sesión|entrenamiento)/ }).first().click();
+      const started = await start; if (!started.ok()) throw new Error(`Inicio entrenamiento HTTP ${started.status()}`);
+      const exercise = page.locator('.logged-exercise').first();
+      await exercise.locator('input[type=number]').nth(0).fill('10');
+      await exercise.locator('input[type=number]').nth(1).fill('0');
+      await exercise.locator('input[type=checkbox]').first().check();
+      await page.getByLabel('Notas de la sesión').fill(`${marker} Prueba funcional; no representa actividad realizada.`);
+      const finish = page.waitForResponse(r => r.url().includes('/api/training/sessions/') && r.request().method() === 'PUT');
+      await page.getByRole('button', { name: 'Finalizar entrenamiento', exact: true }).click();
+      const finished = await finish; if (!finished.ok()) throw new Error(`Guardado entrenamiento HTTP ${finished.status()}`);
+      progress.sessionId = (await finished.json()).session.id;
+      await expect(page.getByText('Registro guardado · Sesión cerrada', { exact: true })).toBeVisible(); save();
+    }
+    console.log('Registro real de entrenamiento simulado: OK');
+    const measurementDate = shift(week, 1);
+    const weights = await api(`weight?from=${week}&to=${shift(week, 6)}&timeZone=${encodeURIComponent(zone)}`);
+    if (!weights.measurements.some(item => item.localDate === measurementDate)) {
+      await page.goto(`${baseURL}/app/peso`); await ready(page);
+      await page.getByLabel('Fecha de medición').fill(measurementDate);
+      await page.getByLabel('Peso (kg)', { exact: true }).fill(String(weights.summary.last?.weightKg || 70));
+      await page.getByLabel('Nota opcional').fill(`${marker} Medición ficticia para verificar persistencia.`);
+      const write = page.waitForResponse(r => r.url().endsWith('/api/weight/measurements') && r.request().method() === 'POST');
+      await page.getByRole('button', { name: 'Guardar peso', exact: true }).click();
+      if (!(await write).ok()) throw new Error('No se guardó la medición de prueba.');
+    }
+    console.log('Registro real de peso simulado: OK');
+    let diary = await api(`food/diary?date=${week}&timeZone=${encodeURIComponent(zone)}`);
+    let photoMeal = diary.meals.find(meal => meal.note?.includes(marker) && meal.items.some(item => item.source === 'gemini'));
+    if (!photoMeal) {
+      if (progress.newPhotoGenerations) throw new Error('La foto ya se generó: revisar el estado antes de consumir otra llamada.');
+      const photo = process.env.E4_PHOTO_PATH || path.join(root, '.auth/inputs/meal.jpg');
+      if (!fs.existsSync(photo)) throw new Error('Falta E4_PHOTO_PATH con fotografía real de comida.');
+      await page.goto(`${baseURL}/app/alimentacion`); await ready(page);
+      await page.getByLabel('Fecha del diario').fill(week);
+      await expect(page.getByRole('button', { name: '+ Registrar comida', exact: true })).toBeEnabled();
+      await page.getByRole('button', { name: '+ Registrar comida', exact: true }).click();
+      await page.getByRole('button', { name: 'Desde una foto', exact: true }).click();
+      await page.getByLabel('Foto de tu comida').setInputFiles(photo);
+      await page.locator('.photo-consent input').check();
+      await expect(page.getByRole('button', { name: 'Analizar foto', exact: true })).toBeEnabled();
+      const analysisResponse = page.waitForResponse(r => r.url().endsWith('/api/food/analyze') && r.request().method() === 'POST', { timeout: 90000 });
+      await page.getByRole('button', { name: 'Analizar foto', exact: true }).click();
+      progress.newPhotoGenerations++; save();
+      const response = await analysisResponse;
+      if (!response.ok()) throw new Error(`Foto real rechazada HTTP ${response.status()} ${(await response.json()).error?.code || ''}`);
+      progress.photoAnalysisId = (await response.json()).analysisId; save();
+      const add = page.getByRole('button', { name: 'Agregar a mi comida', exact: true });
+      await expect(add.first()).toBeVisible();
+      const count = await add.count();
+      for (let i = 0; i < count; i++) await add.nth(i).click();
+      await page.locator('.food-item').first().getByLabel('Cantidad consumida (g)').fill('100');
+      await page.getByLabel('Momento del día').selectOption('extra');
+      await page.getByLabel('Notas', { exact: true }).fill(`${marker} Fotografía real de referencia. Estimaciones revisadas para demo; no representa consumo real.`);
+      const saved = page.waitForResponse(r => r.url().endsWith('/api/food/meals') && r.request().method() === 'POST');
+      await page.getByRole('button', { name: 'Confirmar estimaciones y guardar comida', exact: true }).click();
+      const savedResponse = await saved; if (!savedResponse.ok()) throw new Error(`Comida HTTP ${savedResponse.status()}`);
+      photoMeal = (await savedResponse.json()).meal;
+      progress.photoMealId = photoMeal.id; save();
+    }
+    await page.goto(`${baseURL}/app/alimentacion`); await ready(page);
+    await page.getByLabel('Fecha del diario').fill(week);
+    await expect(page.locator('.food-meal-card').filter({ hasText: marker })).toBeVisible();
+    await page.reload(); await ready(page); await page.getByLabel('Fecha del diario').fill(week);
+    await expect(page.locator('.food-meal-card').filter({ hasText: marker })).toBeVisible();
+    progress.photoMealId = photoMeal.id; save();
+    console.log('Foto real + revisión + guardado + persistencia: OK');
+    const report = await api(`reports/weekly?weekStart=${week}&timeZone=${encodeURIComponent(zone)}`);
+    if (!report.current.training.totalSessions || !report.current.food.meals || report.current.weight.count < 2) throw new Error('Faltan dominios para la demo.');
+    if (!report.logs.some(log => log.type === 'food' && log.id === photoMeal.id)) throw new Error('La foto guardada no aparece en el reporte.');
+    await page.goto(`${baseURL}/app/reportes`); await ready(page);
+    await page.getByLabel('Elegir fecha de la semana').fill(week);
+    const button = page.getByRole('button', { name: 'Analizar semana con IA', exact: true });
+    await expect(button).toBeEnabled();
+    if (progress.newWeeklyGenerations && !progress.reportDigest) throw new Error('La generación semanal se intentó: revisar caché antes de volver a pulsar.');
+    if (progress.reportDigest && progress.reportDigest !== digest(report)) throw new Error('Los datos cambiaron desde la generación; no se forzará otra.');
+    const responsePromise = page.waitForResponse(r => r.url().endsWith('/api/reports/weekly-analysis') && r.request().method() === 'POST', { timeout: 90000 });
+    await button.click();
+    if (!progress.newWeeklyGenerations) { progress.newWeeklyGenerations++; save(); }
+    const response = await responsePromise;
+    if (!response.ok()) throw new Error(`Análisis semanal HTTP ${response.status()} ${(await response.json()).error?.code || ''}`);
+    const generated = await response.json();
+    for (const name of ['Resumen', 'Tendencias', 'Aspectos a revisar']) await expect(page.locator('.weekly-analysis').getByRole('heading', { name, exact: true })).toBeVisible();
+    progress.fingerprint = generated.fingerprint; progress.reportDigest = digest(report); save();
+    await page.reload(); await ready(page); await page.getByLabel('Elegir fecha de la semana').fill(week);
+    await expect(button).toBeEnabled();
+    const cachedPromise = page.waitForResponse(r => r.url().endsWith('/api/reports/weekly-analysis') && r.request().method() === 'POST');
+    await button.click(); const cachedResponse = await cachedPromise;
+    if (!cachedResponse.ok()) throw new Error('Falló consulta de caché.');
+    const cached = await cachedResponse.json();
+    if (!cached.cached || cached.fingerprint !== generated.fingerprint) throw new Error('No se comprobó reutilización de caché.');
+    progress.cacheVerified = true; progress.completedAt = new Date().toISOString(); save();
+    console.log(JSON.stringify({ core: 'OK', photo: 'real guardada', weekly: 'real generada', cache: true,
+      newPhotoAttempts: progress.newPhotoGenerations, newWeeklyAttempts: progress.newWeeklyGenerations, week }));
+  } finally { await browser.close(); }
+})().catch(error => { console.error('Preparación detenida:', error.message); process.exitCode = 1; });

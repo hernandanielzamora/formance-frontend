@@ -61,6 +61,8 @@ test('04 Peso: indicadores, gráfico e historial con varias fechas', async ({ pa
   await capture(page, '04-peso-progreso.png', { anchor: page.getByRole('heading', { name: 'Historial y evolución', exact: true }) });
 });
 test('05 Reporte integrado y análisis real recuperado de caché', async ({ page }) => {
+  test.skip((receipt().analysisVersion || 1) !== 2,
+    'El recibo histórico E4 es v1. No gastar otra generación v2 para recapturar una figura histórica. Validar v2 con verify-insights.cjs.');
   const api = connect(page);
   await page.goto('/app/reportes'); await ready(page);
   await page.getByLabel('Elegir fecha de la semana').fill(week);

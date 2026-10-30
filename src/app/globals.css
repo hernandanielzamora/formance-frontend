@@ -543,3 +543,10 @@ input,select,textarea { min-width:0; }
 .weekly-analysis-result h3 { margin-top: 18px; }
 .weekly-analysis-result ul { padding-left: 24px; }
 .weekly-analysis-result li { margin-block: 8px; }
+.weekly-comparison,.weekly-next-focus { margin-block:20px; padding:16px 20px; border-radius:14px; background:#edf3e4; }
+.weekly-comparison h3,.weekly-next-focus h3 { margin-top:0; }
+.weekly-domain-insights { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-block:20px; }
+.weekly-domain-insights section { padding:16px; border:1px solid var(--line); border-radius:14px; min-width:0; }
+.weekly-domain-insights h3 { margin-top:0; }
+.weekly-next-focus ol { padding-left:20px; }
+@media(max-width:1000px) { .weekly-domain-insights { grid-template-columns:1fr; } }

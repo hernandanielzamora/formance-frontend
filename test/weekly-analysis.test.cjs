@@ -26,7 +26,9 @@ function harness(handler) {
   function render(props = {}) { index = 0; tree = exports.default({ weekStart: '2026-01-05', timeZone: 'UTC', ...props }); return renderToStaticMarkup(tree); }
   return { render, ApiError, calls, click: () => tree.props.children.find(child => child?.type === 'button').props.onClick(), reset: () => { values = []; } };
 }
-const result = { analysis: { summary: 'Según los registros disponibles, semana parcial.', trends: ['Hay registros de entrenamiento.'], reviewPoints: ['Faltan mediciones de peso.'] }, cached: false, fingerprint: 'hash', generatedAt: '2026-01-12' };
+const result = { analysis: { summary: 'Según los registros disponibles, semana parcial.', comparison: 'Se comparan dos días de ambas semanas.',
+  insights: { training: 'Se registraron sesiones en dos días.', nutrition: 'El promedio registrado usa días con datos.', weight: 'No hay suficientes mediciones.' },
+  trends: ['Hay registros de entrenamiento.'], reviewPoints: ['Faltan mediciones de peso.'], nextWeekFocus: ['Mantener condiciones de medición comparables.'] }, cached: false, fingerprint: 'hash', generatedAt: '2026-01-12' };
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 test('Initial state makes no request; click sends selected week, renders loading and all three result blocks', async () => {
@@ -40,8 +42,16 @@ test('Initial state makes no request; click sends selected week, renders loading
   release(result); await settle();
   const rendered = h.render();
   for (const text of ['Resumen', 'Tendencias', 'Aspectos a revisar', result.analysis.summary, ...result.analysis.trends, ...result.analysis.reviewPoints]) assert.ok(rendered.includes(text));
+  for (const text of ['Comparación con la semana anterior', 'Entrenamiento', 'Alimentación', 'Peso y evolución', 'Foco para la próxima semana', result.analysis.comparison,
+    ...Object.values(result.analysis.insights), ...result.analysis.nextWeekFocus]) assert.ok(rendered.includes(text));
   assert.match(rendered, /No constituye una recomendación médica, nutricional ni profesional/);
   assert.doesNotMatch(rendered, /Analizando los registros/);
+});
+test('During staggered deployment a legacy analysis still renders without empty enriched sections', async () => {
+  const h = harness(async () => ({ ...result, analysis: { summary: 'Formato anterior.', trends: ['Tendencia anterior.'], reviewPoints: ['Revisión anterior.'] } }));
+  h.render(); h.click(); await settle();
+  const markup = h.render(); assert.match(markup, /Formato anterior/); assert.match(markup, /Tendencia anterior/);
+  assert.doesNotMatch(markup, /<h3>Comparación con la semana anterior/); assert.doesNotMatch(markup, /<h3>Foco para la próxima semana/);
 });
 test('Errors and quota exhaustion are visible without hiding the independent report', async () => {
   for (const quota of [false, true]) {

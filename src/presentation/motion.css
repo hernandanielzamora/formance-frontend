@@ -1,0 +1,146 @@
+/* Shared presentation motion. All timings are visual, never navigation schedules. */
+.presentation {
+  --motion-duration: 560ms;
+  --motion-stagger: 110ms;
+  --motion-ease: cubic-bezier(.22, 1, .36, 1);
+  --motion-distance: 14px;
+}
+.p-scene {
+  view-transition-name: formance-scene;
+  animation: p-scene-arrive 460ms var(--motion-ease) both;
+  transform-origin: 50% 52%;
+}
+.p-scene :is(.p-motion-reveal, .p-motion-stagger > *, .p-slide > .p-kicker,
+  .p-block > .p-kicker, .p-elicit-eyebrow, .p-statement, .p-cover-top,
+  .p-cover-main h1, .p-cover-main > p, .p-cover-bottom, .p-person,
+  .p-block-caption, .p-elicit-caption, .p-block-ending, .p-unified,
+  .p-context-person, .p-boundaries > *, .p-current-process > .p-process-end,
+  .p-process-direction, .p-market-zone, .p-market-intersection,
+  .p-stakeholder-primary, .p-stakeholder-brand, .p-summary-result) {
+  --motion-order: 0;
+  animation: p-content-rise var(--motion-duration) var(--motion-ease) both;
+  animation-delay: calc(var(--motion-order) * var(--motion-stagger));
+}
+.p-scene :is(.p-statement, .p-cover-main h1) { --motion-order: 1; }
+.p-scene :is(.p-person, .p-context-person, .p-stakeholder-primary) { --motion-order: 2; }
+.p-scene .p-cover-main > p { --motion-order: 3; }
+.p-scene .p-cover-bottom { --motion-order: 5; }
+.p-scene :is(.p-block-caption, .p-elicit-caption, .p-block-ending) { --motion-order: 9; }
+.p-scene .p-motion-stagger > * { --motion-order: calc(var(--motion-base, 3) + 0); }
+.p-scene .p-motion-stagger > :nth-child(2) { --motion-order: calc(var(--motion-base, 3) + 1); }
+.p-scene .p-motion-stagger > :nth-child(3) { --motion-order: calc(var(--motion-base, 3) + 2); }
+.p-scene .p-motion-stagger > :nth-child(4) { --motion-order: calc(var(--motion-base, 3) + 3); }
+.p-scene .p-motion-stagger > :nth-child(5) { --motion-order: calc(var(--motion-base, 3) + 4); }
+.p-scene .p-motion-stagger > :nth-child(n+6) { --motion-order: calc(var(--motion-base, 3) + 5); }
+/* Related domains retain positions but converge gently before the brand resolves. */
+.p-scene .is-integrated .p-domain { animation-name: p-domain-converge; }
+.p-scene .is-integrated .p-domain:first-child { --motion-x: -18px; }
+.p-scene .is-integrated .p-domain:last-child { --motion-x: 18px; }
+.p-scene .p-unified { --motion-order: 8; }
+.p-scene .p-domain svg path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: p-line-draw 600ms var(--motion-ease) 650ms both;
+}
+.p-scene :is(.is-integrated .p-domain:after, .p-step-arrow, .p-system-flow .p-card > span) {
+  animation: p-connection-appear 400ms var(--motion-ease) 700ms both;
+}
+/* A single reusable line reveal serves boundaries and future diagram connections. */
+.p-scene :is(.p-boundary-track:before, [data-motion="line"]) {
+  animation-name: p-line-reveal;
+  animation-duration: 600ms;
+  animation-timing-function: var(--motion-ease);
+  animation-delay: 440ms;
+  animation-fill-mode: both;
+  transform-origin: left center;
+}
+.p-scene .p-boundaries > :first-child { --motion-order: 3; }
+.p-scene .p-boundaries > :nth-child(2) { --motion-order: 4; }
+.p-scene .p-boundaries > :last-child { --motion-order: 7; }
+.p-scene .p-current-process .p-motion-stagger { --motion-base: 4; }
+.p-scene .p-current-process > .p-process-end:first-child { --motion-order: 2; }
+.p-scene .p-current-process > .p-process-direction { --motion-order: 3; }
+.p-scene .p-current-process > .p-process-direction:nth-last-child(2) { --motion-order: 7; }
+.p-scene .p-current-process > .p-process-end:last-child { --motion-order: 8; }
+.p-scene .p-market-zone { --motion-order: 3; }
+.p-scene .p-market-zone:nth-child(2) { --motion-order: 5; }
+.p-scene .p-market-intersection { --motion-order: 7; }
+.p-scene .p-stakeholder-brand { --motion-order: 3; }
+.p-scene .p-stakeholder-orbit { --motion-base: 4; }
+.p-scene .p-summary-result { --motion-order: 7; }
+.p-scene [data-motion="converge"] { animation-name: p-domain-converge; }
+/* Hover and focus respond without moving the layout. */
+.p-controls button { transition: background 300ms ease, color 300ms ease; }
+.p-map-card { transition: border-color 300ms ease; }
+.p-map-card:hover, .p-map-card:focus-visible { border-color: #779a43; }
+@keyframes p-scene-arrive {
+  from { opacity: .25; transform: translateY(10px) scale(.994); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes p-content-rise {
+  from { opacity: 0; transform: translateY(var(--motion-distance)) scale(.996); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes p-domain-converge {
+  from { opacity: 0; transform: translate(var(--motion-x, 0px), 8px) scale(.99); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes p-connection-appear {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes p-line-reveal {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+@keyframes p-line-draw { to { stroke-dashoffset: 0; } }
+/* Native snapshots provide a short exit/entry crossfade without duplicate live DOM. */
+::view-transition { pointer-events: none; }
+::view-transition-old(root) { animation: none; opacity: 0; }
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(formance-scene) { animation: p-scene-depart 340ms ease-out both; }
+::view-transition-new(formance-scene) { animation: p-snapshot-arrive 440ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes p-scene-depart { to { opacity: 0; transform: translateY(-10px) scale(.996); } }
+@keyframes p-snapshot-arrive {
+  from { opacity: 0; transform: translateY(12px) scale(.994); }
+  to { opacity: 1; transform: none; }
+}
+/* Prepared chapter treatment, using the real brand symbol; never a new slide by itself. */
+.p-section-transition { max-width: 1280px; }
+.p-section-isotype { width: 64px; height: auto; margin-bottom: 32px; }
+[data-theme="dark"] .p-section-isotype { filter: brightness(0) invert(1); }
+.p-section-subtitle { font-size: clamp(24px,2vw,36px); line-height: 1.4; color: var(--presentation-muted); }
+.p-section-transition[data-accent="lime"] { border-left: 4px solid var(--accent); padding-left: 36px; }
+/* Brand-accent variant is reserved for a reviewed Figma export; no invented purple asset. */
+.p-section-transition[data-accent="brand"] { border-left: 4px solid var(--presentation-section-accent, var(--accent)); padding-left: 36px; }
+/* Map and accessible motion settings always show complete final content. */
+.p-thumbnail-stage *, .p-thumbnail-stage *:before, .p-thumbnail-stage *:after {
+  animation: none!important;
+  transition: none!important;
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .presentation *, .presentation *:before, .presentation *:after {
+    animation: none!important;
+    transition: none!important;
+    stroke-dashoffset: 0!important;
+  }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none!important; }
+}
+/* A quiet brand layer reuses the real isotype rather than inventing artwork. */
+.p-cover-watermark {
+  position: absolute;
+  right: clamp(24px, 4.6vw, 88px);
+  top: 8%;
+  width: min(36vw, 620px);
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .035;
+  pointer-events: none;
+}
+.p-cover-top, .p-cover-main, .p-cover-bottom { position: relative; }
+.p-scene .p-cover-watermark { animation: p-watermark-arrive 700ms var(--motion-ease) both; }
+@keyframes p-watermark-arrive {
+  from { opacity: 0; transform: translateX(14px) scale(.99); }
+  to { opacity: .035; transform: none; }
+}

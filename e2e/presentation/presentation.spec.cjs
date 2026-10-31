@@ -300,13 +300,13 @@ test('demo opens only by click; offline backup stays inside scene 20', async ({ 
   const open = page.getByRole('button',{name:'Ver capturas de respaldo'});
   await open.click(); const gallery = page.getByRole('dialog');
   await expect(gallery).toBeVisible();
-  for(let i=0;i<4;i++) {
+  for(let i=0;i<5;i++) {
     await expect(gallery.locator('img')).toBeVisible();
     expect(await gallery.locator('img').evaluate(img=>img.complete && img.naturalWidth===1440)).toBeTruthy();
     await gallery.dispatchEvent('wheel',{deltaY:100,bubbles:true,cancelable:true});
     await gallery.locator('strong').click(); await page.keyboard.press('ArrowRight');
     await expect(page).toHaveURL(/#implementacion-demo$/);
-    if(i<3) await gallery.getByRole('button',{name:'Captura siguiente'}).click();
+    if(i<4) await gallery.getByRole('button',{name:'Captura siguiente'}).click();
   }
   await page.keyboard.press('Escape'); await expect(gallery).not.toBeVisible();
   await expect(open).toBeFocused();

@@ -1,4 +1,4 @@
-﻿const { test, expect } = require('../e4/node_modules/@playwright/test');
+const { test, expect } = require('../e4/node_modules/@playwright/test');
 const origin = new URL(process.env.PRESENTATION_LIVE_URL).origin;
 test.beforeEach(async ({ context }) => {
   // No writes or AI/provider calls during publication verification.
@@ -26,6 +26,8 @@ test('public presentation, map, hashes, assets and manual navigation',async({pag
   for(const [key,id] of [['ArrowRight','vision-objetivos'],['ArrowLeft','problema'],['Space','vision-objetivos'],['Home','inicio'],['End','cierre']]){
     await page.keyboard.press(key);await expect(page).toHaveURL(new RegExp(`#${id}$`));
   }
+  await expect(page.locator('#cierre-title')).toBeVisible();
+  await page.evaluate(()=>Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{}))));
   await page.mouse.move(600,400);await page.mouse.wheel(0,-100);await expect(page).toHaveURL(/#implementacion-demo$/);
   await page.getByRole('button',{name:'Presentar',exact:true}).click();
   await expect.poll(()=>page.evaluate(()=>Boolean(document.fullscreenElement))).toBe(true);

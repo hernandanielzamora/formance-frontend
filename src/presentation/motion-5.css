@@ -1,0 +1,137 @@
+/* Experimental layer: finite narrative sequences, no scheduling or layout animation. */
+.presentation { --motion-duration:640ms; --motion-distance:28px; --motion-stagger:105ms; }
+.p-scene { --motion-direction:1; }
+html[data-presentation-direction="backward"] .p-scene { --motion-direction:-1; }
+@keyframes p-scene-arrive {
+ from {opacity:.15;transform:translateX(calc(24px * var(--motion-direction))) scale(.99)}
+ to {opacity:1;transform:none}
+}
+@keyframes p-content-rise {
+ from {opacity:0;transform:translateY(var(--motion-distance)) scale(.98)}
+ to {opacity:1;transform:none}
+}
+@keyframes p-domain-converge {
+ from {opacity:0;transform:translate(var(--motion-x,0px),20px) scale(.97)}
+ to {opacity:1;transform:none}
+}
+/* Forward and backward snapshots keep the same visual direction as the input. */
+::view-transition-old(formance-scene) {animation:p-scene-depart 420ms var(--motion-ease,cubic-bezier(.22,1,.36,1)) both}
+::view-transition-new(formance-scene) {animation:p-snapshot-arrive 520ms cubic-bezier(.22,1,.36,1) both}
+@keyframes p-scene-depart {to {opacity:0;transform:translateX(-32px) scale(.985)}}
+@keyframes p-snapshot-arrive {from {opacity:0;transform:translateX(32px) scale(.99)}to{opacity:1;transform:none}}
+html[data-presentation-direction="backward"]::view-transition-old(formance-scene) {animation-name:p-snapshot-back-out}
+html[data-presentation-direction="backward"]::view-transition-new(formance-scene) {animation-name:p-snapshot-back-in}
+@keyframes p-snapshot-back-out {to{opacity:0;transform:translateX(32px) scale(.985)}}
+@keyframes p-snapshot-back-in {from{opacity:0;transform:translateX(-32px) scale(.99)}to{opacity:1;transform:none}}
+/* 03 → 04: the same domain cards travel into the integrated composition. */
+@media(prefers-reduced-motion:no-preference) {
+ .p-scene:is([data-scene="problema"],[data-scene="vision-objetivos"]) .p-domain:nth-child(1){view-transition-name:formance-training}
+ .p-scene:is([data-scene="problema"],[data-scene="vision-objetivos"]) .p-domain:nth-child(2){view-transition-name:formance-food}
+ .p-scene:is([data-scene="problema"],[data-scene="vision-objetivos"]) .p-domain:nth-child(3){view-transition-name:formance-weight}
+}
+::view-transition-group(formance-training),::view-transition-group(formance-food),::view-transition-group(formance-weight){animation-duration:650ms;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+.p-scene .is-integrated .p-domain:first-child{--motion-x:-36px}
+.p-scene .is-integrated .p-domain:last-child{--motion-x:36px}
+.p-scene[data-scene="vision-objetivos"] .p-unified{animation-delay:1000ms}
+.p-scene[data-scene="vision-objetivos"] .p-vision-objectives>:first-child{animation-delay:1280ms}
+.p-scene[data-scene="vision-objetivos"] .p-vision-objectives>:last-child{animation-delay:1430ms}
+/* 05: node, connection, next node. The endpoint carries the product accent. */
+.p-scene .p-scope-flow>li {animation-delay:calc(280ms + (var(--motion-order) - 3) * 170ms)}
+.p-scene .p-scope-flow .p-step-arrow{animation:p-connection-trace 260ms var(--motion-ease) both;animation-delay:calc(470ms + (var(--motion-order) - 3) * 170ms)}
+.p-scope-flow>li:last-child{border-color:#9fbf70;background:#edf2e6}
+.p-scene .p-scope-boundaries>:first-child{animation-delay:1350ms}
+.p-scene .p-scope-boundaries>:last-child{animation-delay:1550ms}
+@keyframes p-connection-trace {from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:none}}
+/* 06: four quiet directions, then the scope decision. */
+.p-scene .p-exclusions>.p-card{animation-name:p-card-unfold;--card-x:-24px;--card-y:16px}
+.p-scene .p-exclusions>.p-card:nth-child(2){--card-x:24px;--card-y:16px}
+.p-scene .p-exclusions>.p-card:nth-child(3){--card-x:-24px;--card-y:-16px}
+.p-scene .p-exclusions>.p-card:nth-child(4){--card-x:24px;--card-y:-16px}
+.p-scene[data-scene="no-contempla"] .p-block-ending{animation-delay:1120ms}
+@keyframes p-card-unfold {from{opacity:0;transform:translate(var(--card-x,0px),var(--card-y,24px)) scale(.97)}to{opacity:1;transform:none}}
+/* 07–10: actor → domains; technical rows; convergence; radial context. */
+.p-scene[data-scene="contexto-proceso"] .p-context-person{animation-delay:260ms}
+.p-scene[data-scene="contexto-proceso"] .p-context-domains{--motion-base:5}
+.p-scene[data-scene="contexto-proceso"] .p-elicit-caption{animation-delay:1080ms}
+.p-scene .p-tech-layers dd>span{animation:p-option-reveal 420ms var(--motion-ease) both;animation-delay:calc(var(--motion-order) * var(--motion-stagger) + 90ms)}
+.p-scene .p-tech-layers dd>span+span{animation-delay:calc(var(--motion-order) * var(--motion-stagger) + 190ms)}
+@keyframes p-option-reveal{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.p-scene .p-market-zone{animation-name:p-card-unfold;--card-x:-32px;--card-y:10px;animation-delay:300ms}
+.p-scene .p-market-zone:nth-child(2){--card-x:32px;animation-delay:520ms}
+.p-scene .p-market-intersection{animation:p-intersection-resolve 720ms var(--motion-ease) 800ms both}
+@keyframes p-intersection-resolve{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:none}}
+.p-scene .p-market-bridges>span{display:inline-block;animation:p-connection-trace 400ms var(--motion-ease) 650ms both}
+.p-scene .p-stakeholder-primary{animation-delay:250ms}
+.p-scene .p-stakeholder-brand{animation-delay:470ms}
+.p-scene .p-stakeholder-orbit>.p-card{animation-name:p-card-unfold;--card-x:-24px;--card-y:-18px;animation-delay:calc(650ms + (var(--motion-order) - 4) * 100ms)}
+.p-scene .p-stakeholder-orbit>.p-card:nth-child(2){--card-x:-10px;--card-y:18px}
+.p-scene .p-stakeholder-orbit>.p-card:nth-child(3){--card-x:10px;--card-y:18px}
+.p-scene .p-stakeholder-orbit>.p-card:nth-child(4){--card-x:24px;--card-y:-18px}
+/* 13–15: circulation and a causal progression, ending at the opportunity. */
+.p-final-chain>.p-card,.p-final-diagnosis>.p-card{position:relative}
+.p-scene .p-final-chain>.p-card,.p-scene .p-final-diagnosis>.p-card{animation-name:p-card-unfold;--card-x:-28px;--card-y:0px;animation-delay:calc(300ms + (var(--motion-order) - 3) * 180ms)}
+.p-scene .p-final-chain>.p-card:after,.p-scene .p-final-architecture>.p-card:after{animation:p-connection-trace 300ms var(--motion-ease) both;animation-delay:calc(490ms + (var(--motion-order) - 3) * 180ms)}
+.p-scene[data-scene="relevamiento-organizacional"] .p-final-cards{--motion-base:11}
+.p-final-diagnosis>.p-card:before{content:'';position:absolute;height:3px;left:18px;right:18px;bottom:0;background:var(--accent);transform-origin:left}
+.p-scene .p-final-diagnosis>.p-card:before{animation:p-causal-accent 520ms var(--motion-ease) both;animation-delay:calc(380ms + (var(--motion-order) - 3) * 180ms)}
+.p-scene .p-final-diagnosis>.p-card:last-child:before{animation-name:p-causal-arrive}
+@keyframes p-causal-accent{0%{opacity:0;transform:scaleX(0)}45%{opacity:1;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1)}}
+@keyframes p-causal-arrive{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+/* 16: the process changes, instead of repeating modules. */
+.p-process-transformation{display:grid;grid-template-columns:1fr 64px 1fr;align-items:center;gap:24px}
+.p-process-state{border:1px solid var(--presentation-border);border-radius:20px;padding:28px;position:relative;overflow:hidden}
+.p-process-state small{font-size:16px;letter-spacing:.1em;color:var(--presentation-muted)}
+.p-process-state ol{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:14px}
+.p-process-state li{font-size:clamp(22px,1.8vw,32px);line-height:1.25}
+.p-process-state li+li:before{content:'↓';display:block;color:var(--presentation-muted);font-size:20px;margin-bottom:10px}
+.p-process-after{background:#edf2e6;border-color:#b2cb8d}
+.p-transformation-bridge{font-size:44px;text-align:center;color:var(--presentation-muted)}
+.p-scene .p-process-before{animation:p-card-unfold 600ms var(--motion-ease) 300ms both;--card-x:-28px;--card-y:0px}
+.p-scene .p-process-before li{animation:p-content-rise 420ms var(--motion-ease) both;animation-delay:calc(400ms + var(--step,0) * 110ms)}
+.p-scene .p-process-state li:nth-child(2){--step:1}
+.p-scene .p-process-state li:nth-child(3){--step:2}
+.p-scene .p-transformation-bridge{animation:p-connection-trace 420ms var(--motion-ease) 820ms both}
+.p-scene .p-process-after{animation:p-state-transform 650ms var(--motion-ease) 1040ms both}
+.p-scene .p-process-after li{animation:p-content-rise 420ms var(--motion-ease) both;animation-delay:calc(1130ms + var(--step,0) * 110ms)}
+.p-scene[data-scene="propuesta"] .p-block-caption{animation-delay:1580ms}
+@keyframes p-state-transform{from{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-24px)}to{opacity:1;clip-path:none;transform:none}}
+/* 17–19: decision matrix, grouped RF cadence and complementary specification. */
+.p-scene[data-scene="reglas-solucion"] .p-final-cards>.p-card:last-child{animation-name:p-card-unfold;--card-x:0px;--card-y:28px}
+.p-final-reglas-solucion .p-final-cards>.p-card:last-child{border-color:#b2cb8d}
+.p-scene[data-scene="requerimientos-funcionales"] .p-final-cards{--motion-base:3}
+.p-scene .p-final-model>.p-card{animation-name:p-card-unfold;--card-x:28px;--card-y:0px}
+.p-scene .p-final-model>.p-card:last-child{--card-x:-28px;animation-delay:500ms}
+/* 20: build the implemented layers, then providers, then the manual invitation. */
+.p-scene .p-final-architecture>.p-card{animation-name:p-card-unfold;--card-x:-28px;--card-y:0px;animation-delay:calc(300ms + (var(--motion-order) - 3) * 230ms)}
+.p-scene .p-provider-services{animation:p-content-rise 500ms var(--motion-ease) 1050ms both}
+.p-scene .p-demo-access>.p-cta{animation:p-cta-resolve 640ms var(--motion-ease) 1400ms both}
+.p-scene .p-demo-access>.p-demo-backup{animation:p-content-rise 450ms var(--motion-ease) 1630ms both}
+.p-scene[data-scene="implementacion-demo"] .p-block-caption{animation-delay:1750ms}
+@keyframes p-cta-resolve{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:none}}
+/* 21: the final statements resolve one by one and remain still. */
+.p-scene .p-final-closing>:nth-child(1){animation-delay:500ms}
+.p-scene .p-final-closing>:nth-child(2){animation-delay:720ms}
+.p-scene .p-final-closing>:nth-child(3){animation-delay:940ms}
+.p-scene .p-final-brand{animation:p-content-rise 700ms var(--motion-ease) 1230ms both}
+.p-scene[data-scene="cierre"] .p-block-caption{animation-delay:1530ms}
+.p-closing-watermark{position:absolute;right:6%;top:15%;width:min(36vw,620px);height:auto;filter:brightness(0) invert(1);opacity:.035;pointer-events:none}
+.p-scene .p-closing-watermark{animation:p-closing-depth 1500ms var(--motion-ease) 180ms both}
+@keyframes p-closing-depth{from{opacity:0;transform:translateX(36px) scale(.97)}to{opacity:.035;transform:none}}
+@media(max-width:700px){
+ .p-process-transformation{grid-template-columns:1fr;gap:10px}
+ .p-process-state{padding:14px 18px}.p-process-state small{font-size:11px}
+ .p-process-state ol{margin-top:10px;gap:6px}.p-process-state li{font-size:16px}
+ .p-process-state li+li:before{display:none}
+ .p-transformation-bridge{font-size:24px;line-height:1;transform:rotate(90deg)}
+ .p-closing-watermark{width:55vw;right:2%;top:14%}
+}
+/* Same complete end state with reduced motion or in map thumbnails. */
+.p-thumbnail-stage .p-final-diagnosis>.p-card:not(:last-child):before{opacity:0}
+@media(prefers-reduced-motion:reduce){
+ .p-final-diagnosis>.p-card:not(:last-child):before{opacity:0}
+}
+/* Endpoints follow the complete diagram, including supporting context. */
+.p-scene[data-scene="relevamiento-organizacional"] .p-block-caption{animation-delay:1640ms}
+.p-scene[data-scene="as-is"] .p-block-caption{animation-delay:1490ms}
+.p-scene[data-scene="diagnostico"] .p-block-caption{animation-delay:1650ms}
+.p-scene[data-scene="requisitos-modelado"] .p-block-caption{animation-delay:1190ms}

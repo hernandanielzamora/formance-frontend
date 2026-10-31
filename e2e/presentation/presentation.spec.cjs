@@ -245,7 +245,7 @@ test.describe('motion system', () => {
 });
 
 test('reduced motion exposes all content immediately, including SVG and pseudo connections', async ({ page }) => {
-  for (const id of ['inicio','vision-objetivos','alcance-limites','competencia','sintesis-elicitacion']) {
+  for (const id of scenes.map(scene => scene.id)) {
     await page.goto(`/presentacion#${id}`);
     await expect(page.locator('h1')).toHaveAttribute('id',`${id}-title`);
     expect(await page.locator('.p-scene').evaluate(el => el.getAnimations({subtree:true}).length)).toBe(0);
@@ -270,15 +270,16 @@ test('merged content preserves objectives, boundaries and new design conclusions
   await expect(page.locator('.p-scope-boundaries')).toContainText('HASTA');
   await page.goto('/presentacion#contexto-proceso');
   await expect(page.locator('.p-context-person')).toContainText('actividad física estructurada');
-  await expect(page.locator('.p-current-process .p-card')).toHaveCount(3);
-  await expect(page.locator('.p-current-process')).toContainText('Comparación manual');
+  await expect(page.locator('.p-context-domains .p-card')).toHaveCount(3);
+  await expect(page.locator('.p-slide')).not.toContainText('Comparación manual');
+  await expect(page.locator('.p-slide')).toContainText('Evolución física');
   await page.goto('/presentacion#sintesis-elicitacion');
   for(const label of ['Centralización','Simplicidad','Integración controlada']) await expect(page.locator('.p-summary-findings')).toContainText(label);
   await expect(page.locator('h1')).not.toContainText('El problema no era registrar');
 });
 
 test('legacy hashes resolve to merged equivalents without duplicate scenes', async ({page}) => {
-  for(const [before,after] of [['formance','vision-objetivos'],['objetivo-proyecto','vision-objetivos'],['objetivo-sistema','vision-objetivos'],['alcance','alcance-limites'],['limites','alcance-limites'],['contexto','contexto-proceso'],['proceso-actual','contexto-proceso']]) {
+  for(const [before,after] of [['formance','vision-objetivos'],['objetivo-proyecto','vision-objetivos'],['objetivo-sistema','vision-objetivos'],['alcance','alcance-limites'],['limites','alcance-limites'],['contexto','contexto-proceso'],['proceso-actual','as-is']]) {
     await page.goto(`/presentacion#${before}`);
     await expect(page).toHaveURL(new RegExp(`#${after}$`));
     await expect(page.locator('h1')).toHaveAttribute('id',`${after}-title`);
@@ -299,16 +300,70 @@ test('demo opens only by click; offline backup stays inside scene 20', async ({ 
   const open = page.getByRole('button',{name:'Ver capturas de respaldo'});
   await open.click(); const gallery = page.getByRole('dialog');
   await expect(gallery).toBeVisible();
-  for(let i=0;i<4;i++) {
+  for(let i=0;i<5;i++) {
     await expect(gallery.locator('img')).toBeVisible();
     expect(await gallery.locator('img').evaluate(img=>img.complete && img.naturalWidth===1440)).toBeTruthy();
     await gallery.dispatchEvent('wheel',{deltaY:100,bubbles:true,cancelable:true});
     await gallery.locator('strong').click(); await page.keyboard.press('ArrowRight');
     await expect(page).toHaveURL(/#implementacion-demo$/);
-    if(i<3) await gallery.getByRole('button',{name:'Captura siguiente'}).click();
+    if(i<4) await gallery.getByRole('button',{name:'Captura siguiente'}).click();
   }
   await page.keyboard.press('Escape'); await expect(gallery).not.toBeVisible();
   await expect(open).toBeFocused();
   await page.getByRole('button',{name:'Siguiente',exact:true}).click();
   await expect(page).toHaveURL(/#cierre$/);
+});
+
+test.describe('motion 5 narrative continuity', () => {
+  test.use({ reducedMotion:'no-preference' });
+  test('sequences direct attention, remain finite and settle at their real end state', async ({ page }) => {
+    test.setTimeout(90000);
+    const delay = locator => locator.evaluate(el=>parseFloat(getComputedStyle(el).animationDelay));
+    await page.goto('/presentacion#vision-objetivos');
+    expect(await delay(page.locator('.p-unified'))).toBeGreaterThan(await delay(page.locator('.p-domain').last()));
+    expect(await delay(page.locator('.p-vision-objectives').locator('.p-card').first())).toBeGreaterThan(await delay(page.locator('.p-unified')));
+    await page.goto('/presentacion#alcance-limites');
+    const scopeDelays=await page.locator('.p-scope-flow>li').evaluateAll(nodes=>nodes.map(n=>parseFloat(getComputedStyle(n).animationDelay)));
+    for(let i=1;i<scopeDelays.length;i++) expect(scopeDelays[i]).toBeGreaterThan(scopeDelays[i-1]);
+    await page.goto('/presentacion#propuesta');
+    const before=page.locator('.p-process-before'),after=page.locator('.p-process-after');
+    expect(await delay(after)).toBeGreaterThan(await delay(before));
+    await expect(before).toContainText('Reconstrucci\u00f3n manual');
+    await expect(after).toContainText('Resumen estructurado');
+    await expect(page.locator('.p-process-transformation')).not.toContainText('Perfil');
+    await page.goto('/presentacion#implementacion-demo');
+    const backendDelay = await delay(page.locator('.p-final-architecture>.p-card').nth(1));
+    const providersDelay = await delay(page.locator('.p-provider-services'));
+    const ctaDelay = await delay(page.locator('.p-demo-access>.p-cta'));
+    expect(providersDelay).toBeGreaterThan(backendDelay);expect(ctaDelay).toBeGreaterThan(providersDelay);
+    await page.goto('/presentacion#cierre');
+    const closing = await page.locator('.p-final-closing>p').evaluateAll(nodes=>nodes.map(n=>parseFloat(getComputedStyle(n).animationDelay)));
+    expect(closing[1]).toBeGreaterThan(closing[0]);expect(closing[2]).toBeGreaterThan(closing[1]);
+    expect(await delay(page.locator('.p-final-brand'))).toBeGreaterThan(closing[2]);
+    for(const scene of scenes) {
+      await page.goto(`/presentacion#${scene.id}`);
+      await expect(page.locator('h1')).toHaveAttribute('id',`${scene.id}-title`);
+      await page.locator('.p-scene').evaluate(async el=>{
+        const animations=el.getAnimations({subtree:true});
+        if(animations.some(a=>a.effect.getTiming().iterations!==1)) throw Error('Loop detected');
+        await Promise.all(animations.map(a=>a.finished));
+      });
+      await expect(page).toHaveURL(new RegExp(`#${scene.id}$`));
+      const concealed=await page.locator('.p-slide').evaluate(el=>Array.from(el.querySelectorAll('h1,h2,p,li,.p-card,.p-unified,.p-cta,.p-final-brand,.p-process-state')).filter(n=>!n.closest('dialog') && n.getBoundingClientRect().width>0).filter(n=>getComputedStyle(n).opacity!=='1' || getComputedStyle(n).clipPath!=='none').map(n=>n.textContent));
+      expect(concealed,scene.id).toEqual([]);
+    }
+  });
+  test('manual transition direction reverses and rapid input cancels snapshots safely', async ({ page }) => {
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await page.goto('/presentacion#problema');
+    await page.keyboard.press('ArrowRight');await expect(page).toHaveURL(/#vision-objetivos$/);
+    await expect(page.locator('.p-scene')).toHaveAttribute('data-scene','vision-objetivos');
+    await expect(page.locator('html')).toHaveAttribute('data-presentation-direction','forward');
+    await page.keyboard.press('ArrowLeft');await expect(page).toHaveURL(/#problema$/);
+    await expect(page.locator('html')).toHaveAttribute('data-presentation-direction','backward');
+    for(const key of ['ArrowRight','ArrowRight','ArrowLeft','End','Home','End']) await page.keyboard.press(key);
+    await expect(page.locator('#cierre-title')).toBeVisible();
+    await page.locator('.p-scene').evaluate(el=>Promise.all(el.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{}))));
+    await expect(page).toHaveURL(/#cierre$/);expect(errors).toEqual([]);
+  });
 });

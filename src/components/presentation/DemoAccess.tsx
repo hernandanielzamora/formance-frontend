@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useRef, useState } from 'react';
 const captures = [
+  ['01-perfil-objetivo.png','Perfil y objetivo · captura E4'],
   ['02-entrenamiento.png','Entrenamiento registrado'],
   ['03-alimentacion-ia.png','Alimentación e interpretación asistida'],
   ['04-peso-progreso.png','Peso y progreso'],

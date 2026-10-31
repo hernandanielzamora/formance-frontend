@@ -27,10 +27,11 @@ export default function PresentationShell() {
     function navigate(next: number) {
         const bounded = Math.max(0, Math.min(active.length - 1, next));
         if (!active[bounded] || bounded === requestedIndex.current) return;
+        const direction = bounded > requestedIndex.current ? 1 : -1;
         requestedIndex.current = bounded;
         const hash = `#${active[bounded].id}`;
         if (window.location.hash !== hash) window.history.pushState(null, '', hash);
-        animateScene(() => setIndex(bounded));
+        animateScene(() => setIndex(bounded), direction);
     }
     useEffect(() => {
         function sync() { cancelSceneTransition(); const hashId = window.location.hash.slice(1); const id = slideHashAliases[hashId] ?? hashId; const next = active.findIndex(s => s.id === id); requestedIndex.current = next < 0 ? 0 : next; setIndex(requestedIndex.current); if (next < 0 || id !== hashId)

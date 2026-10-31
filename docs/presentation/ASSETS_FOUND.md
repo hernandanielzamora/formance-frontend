@@ -28,3 +28,7 @@ Previews: `docs/presentation/previews/01-cover.png` a `21-closing.png` (nombres 
 Respaldo público de slide 20: `public/presentation/demo/02-entrenamiento.png`, `03-alimentacion-ia.png`, `04-peso-progreso.png`, `05-reporte-ia.png`. Copias sin modificaciones de `docs/e4/screenshots/`, con registros de demostración; no requieren recaptura ni llamadas a servicios. Se excluyó la captura de perfil por conservar referencias de una cuenta real. Los originales E4 siguen intactos.
 
 Revisado nuevamente: marca horizontal oscura/blanca e isotipo disponibles; no se encontró export aprobado de Figma purple/blue ni mockup. Pendientes concretos en `ASSETS_NEEDED.md`.
+
+## Preparación para publicación
+
+Se agregó la quinta captura E4 original, `public/presentation/demo/01-perfil-objetivo.png`, para completar el respaldo solicitado en live. Conserva las referencias de perfil del original, con nombre/correo ya redactados; no se presenta como datos sintéticos ni se recapturó el MVP. El respaldo sigue siendo manual y no llama a servicios externos.

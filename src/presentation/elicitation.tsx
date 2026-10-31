@@ -16,20 +16,18 @@ function ElicitationScene({ id, eyebrow, title, children }: {
 const section = presentationBlocks[2].title;
 export const elicitationSlides: PresentationSlide[] = [
   {
-    id: 'contexto-proceso', section, speaker: 'Nahuel', title: 'El seguimiento ya existe. Pero ocurre por separado.',
+    id: 'contexto-proceso', section, speaker: 'Nahuel', title: 'Antes de modelar, definimos el contexto a relevar.',
     notes: [
       'Actor: persona con actividad física estructurada; necesita seguir entrenamiento, alimentación y evolución física.',
       'Escenario de referencia simulado, sin organización cliente real.',
-      'Describir el estado actual: objetivo, registros en herramientas distintas y comparación manual.',
+      'Delimitar el contexto de elicitación: actor y tres dimensiones de su seguimiento. Las herramientas son fuentes de información, no un proceso modelado en esta escena.',
+      'Reservar la secuencia entrada, registros, procesamiento y resultado para el AS-IS de la slide 14.',
       'No desarrollar diagnóstico. Pasar a las alternativas técnicas analizadas.',
     ],
-    render: <ElicitationScene id="contexto-proceso" eyebrow="CONTEXTO Y PROCESO ACTUAL" title={<>El seguimiento ya existe.<br /><span>Pero ocurre por separado.</span></>}>
+    render: <ElicitationScene id="contexto-proceso" eyebrow="CONTEXTO DE ELICITACIÓN" title={<>Antes de modelar,<br /><span>definimos el contexto a relevar.</span></>}>
       <div className="p-context-person"><span className="p-domain-number">ACTOR PRINCIPAL</span><h2>Persona que realiza actividad física estructurada</h2></div>
-      <div className="p-current-process"><div className="p-process-end">Objetivo físico</div><span className="p-process-direction" aria-hidden="true">↓</span>
-        <div className="p-context-domains p-motion-stagger">{[['Entrenamiento','Herramienta A'],['Alimentación','Herramienta B'],['Peso','Herramienta C']].map(([title,tool]) => <div className="p-card" key={title}><span className="p-domain-number">{tool}</span><h2>{title}</h2></div>)}</div>
-        <span className="p-process-direction" aria-hidden="true">↓</span><div className="p-process-end">Comparación manual</div>
-      </div>
-      <p className="p-elicit-caption">Escenario de referencia simulado · Entrenamiento, alimentación y evolución física.</p>
+      <div className="p-context-domains p-motion-stagger">{['Entrenamiento','Alimentación','Evolución física'].map((title,index) => <div className="p-card" key={title}><span className="p-domain-number">0{index+1}</span><h2>{title}</h2></div>)}</div>
+      <p className="p-elicit-caption">Escenario de referencia simulado.</p>
     </ElicitationScene>,
   },
   {

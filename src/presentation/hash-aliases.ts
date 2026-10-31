@@ -6,5 +6,5 @@ export const slideHashAliases: Record<string, string> = {
   alcance: 'alcance-limites',
   limites: 'alcance-limites',
   contexto: 'contexto-proceso',
-  'proceso-actual': 'contexto-proceso',
+  'proceso-actual': 'as-is',
 };

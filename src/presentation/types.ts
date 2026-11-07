@@ -5,6 +5,7 @@ export type PresentationSlide = {
     section: string;
     title: string;
     speaker?: typeof speakers[number];
+    handoffTo?: typeof speakers[number];
     /** Rehearsal estimate only. Never schedules or triggers navigation. */
     durationSeconds?: number;
     notes?: string[];

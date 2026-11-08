@@ -1,6 +1,7 @@
 # Formance · Frontend
 
-Reportes incluye análisis semanal manual con IA, separado del resumen calculado:
+Reportes abre con [tu semana de un vistazo](docs/weekly-glance.md): estados, logros, mejoras y foco.
+El análisis escrito con IA es opcional y está plegado:
 [comportamiento, estados y caché](docs/weekly-ai-analysis.md).
 
 [Lectura ampliada de la semana](docs/weekly-ai-insights.md): comparación anterior,

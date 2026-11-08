@@ -1,11 +1,11 @@
 ﻿'use client';
 import { useRef, useState } from 'react';
 const captures = [
-  ['01-perfil-objetivo.png','Perfil y objetivo · captura E4'],
+  ['01-perfil-objetivo.png','Inicio: hoy y esta semana'],
   ['02-entrenamiento.png','Entrenamiento registrado'],
-  ['03-alimentacion-ia.png','Alimentación e interpretación asistida'],
-  ['04-peso-progreso.png','Peso y progreso'],
-  ['05-reporte-ia.png','Reporte semanal y análisis guardado'],
+  ['03-alimentacion-ia.png','Alimentación del día frente al objetivo'],
+  ['04-peso-progreso.png','Peso y evolución'],
+  ['05-reporte-ia.png','Tu semana en 10 segundos'],
 ];
 export function DemoAccess() {
   const dialog = useRef<HTMLDialogElement>(null);

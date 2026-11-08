@@ -214,3 +214,141 @@
 .p-thumbnail-stage .p-pitch-market,.p-thumbnail-stage .p-pitch-boundaries { grid-template-columns:1fr 1fr; }
 .p-thumbnail-stage .p-pitch-pillars,.p-thumbnail-stage .p-pitch-rules { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .p-thumbnail-stage .p-pitch-demo { grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr); }
+
+/* ===== Pulido de la defensa final ===== */
+/* Proyector: ningún texto de apoyo por debajo de ~18px a 1920. */
+.p-pitch .p-person { font-size:clamp(15px,1.05vw,19px); }
+.p-pitch-product-grid figcaption { font-size:clamp(14px,1vw,18px); }
+.p-pitch-demo .p-demo-backup { font-size:clamp(15px,1vw,18px); }
+
+/* 03 · Problema: datos desparramados en lugares distintos. */
+.p-scattered { position:relative; }
+.p-scattered .p-domain-row { gap:clamp(28px,3vw,56px); }
+.p-scattered .p-domain:nth-child(1) { rotate:-2.5deg; translate:0 10px; }
+.p-scattered .p-domain:nth-child(2) { rotate:1.8deg; translate:0 -8px; }
+.p-scattered .p-domain:nth-child(3) { rotate:-1.2deg; translate:0 16px; }
+.p-scattered-sources { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(28px,3vw,56px); margin-top:22px; }
+.p-scattered-sources span { justify-self:start; padding:6px 14px; border:1.5px dashed #b9c2b0; border-radius:30px; font-size:clamp(14px,1vw,18px); color:var(--presentation-muted); background:#fff; }
+.p-scattered-sources span:nth-child(2) { margin-top:-6px; } .p-scattered-sources span:nth-child(3) { margin-top:10px; }
+
+/* 04 · Mercado: islas que se conectan en Formance. */
+.p-islands { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(40px,.4fr) auto minmax(40px,.4fr) minmax(0,1fr); align-items:center; }
+.p-island { padding:26px 30px; }
+.p-island h2 { margin:14px 0 18px; }
+.p-island-link { position:relative; height:2px; }
+.p-island-link i { position:absolute; inset:0; background:repeating-linear-gradient(90deg,var(--presentation-accent) 0 10px,transparent 10px 18px); transform-origin:left; }
+.p-island-link.is-right i { transform-origin:right; }
+.p-island-link i+i { display:none; }
+.p-island-hub { display:grid; justify-items:center; gap:8px; padding:22px 26px; border-radius:22px; background:#eaf0e0; border:1.5px solid #b2cb8d; box-shadow:0 18px 40px #19221b14; }
+.p-island-hub img { width:clamp(150px,12vw,220px); }
+.p-island-hub small { font-size:clamp(14px,1vw,18px); color:#425c2a; font-weight:600; }
+
+/* 05 · Posicionamiento: vos → Formance → tu profesional. */
+.p-care-flow { display:grid; grid-template-columns:minmax(0,1fr) 70px minmax(0,1.2fr) 70px minmax(0,1fr); align-items:center; }
+.p-care-node { display:grid; gap:8px; padding:26px 28px; border:1px solid var(--presentation-border); border-radius:20px; background:#fff; min-width:0; }
+.p-care-node span { font-size:clamp(13px,.9vw,16px); letter-spacing:.12em; color:var(--presentation-muted); }
+.p-care-node strong { font-size:clamp(24px,2vw,36px); font-weight:600; letter-spacing:-.03em; line-height:1.15; }
+.p-care-node small { font-size:clamp(17px,1.25vw,23px); color:var(--presentation-muted); line-height:1.35; }
+.p-care-node.is-brand { justify-items:center; text-align:center; background:#eaf0e0; border-color:#b2cb8d; padding:34px 28px; }
+.p-care-node.is-brand img { width:clamp(180px,15vw,280px); }
+.p-care-node.is-brand small { color:#425c2a; }
+.p-care-arrow { position:relative; height:2px; margin-inline:10px; background:var(--presentation-ink,#141b15); }
+.p-care-arrow::after { content:''; position:absolute; right:-2px; top:-6px; border:7px solid transparent; border-left:10px solid var(--presentation-ink,#141b15); border-right:0; }
+
+/* 07 · Tu semana en 10 segundos (réplica de la lectura real). */
+.wg { display:grid; gap:clamp(12px,1.4vh,18px); }
+.wg-head { position:relative; padding:18px 24px 18px 30px; border-radius:18px; background:linear-gradient(120deg,#f1f8e6,#fff 70%); border:1px solid var(--presentation-border); overflow:hidden; }
+.wg-head::before { content:''; position:absolute; inset:0 auto 0 0; width:6px; background:#7fae3c; }
+.wg-eyebrow { font-size:clamp(11px,.75vw,14px); letter-spacing:.14em; color:var(--presentation-muted); }
+.wg-head strong { display:block; margin:4px 0 2px; font-size:clamp(26px,2.1vw,38px); letter-spacing:-.03em; font-weight:600; }
+.wg-head p { margin:0; font-size:clamp(16px,1.15vw,21px); color:#3c463c; }
+.wg-head b { font-weight:600; color:#a2401c; }
+.wg-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(12px,1vw,18px); }
+.wg-card { display:flex; flex-direction:column; min-width:0; padding:18px 20px; border-radius:18px; background:#fff; border:1px solid var(--presentation-border); }
+.wg-card header { display:flex; justify-content:space-between; align-items:center; font-size:clamp(15px,1.05vw,19px); font-weight:600; }
+.wg-card header em { font-style:normal; font-size:clamp(12px,.8vw,15px); padding:4px 10px; border-radius:20px; background:#e8f3d8; color:#3f6a17; }
+.wg-card>strong { margin-top:10px; font-size:clamp(34px,2.8vw,52px); letter-spacing:-.04em; font-weight:600; line-height:1; font-variant-numeric:tabular-nums; }
+.wg-card>strong small { font-size:.42em; letter-spacing:0; color:var(--presentation-muted); font-weight:500; }
+.wg-card>small { margin-top:4px; font-size:clamp(13px,.9vw,16px); color:var(--presentation-muted); }
+.wg-dots { list-style:none; margin:16px 0 6px; padding:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.wg-dots li { display:grid; justify-items:center; gap:4px; }
+.wg-dots li>span { display:grid; place-items:center; width:100%; max-width:38px; aspect-ratio:1; border-radius:50%; background:#7fae3c; color:#fff; font-weight:700; font-size:clamp(13px,.9vw,16px); }
+.wg-dots .is-rest>span { transform:scale(.4); background:#dfe3da; }
+.wg-dots small { font-size:clamp(11px,.7vw,13px); color:var(--presentation-muted); }
+.wg-bars { position:relative; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; height:clamp(70px,8vh,96px); margin:16px 0 22px; }
+.wg-bars>div { position:relative; display:flex; align-items:flex-end; height:100%; border-radius:6px; background:#f4f5f1; }
+.wg-bars>div>span { display:block; width:100%; border-radius:6px; background:#9cc265; transform-origin:bottom; }
+.wg-bars .is-over>span { background:#e4a25f; }
+.wg-bars small { position:absolute; bottom:-18px; left:0; right:0; text-align:center; font-size:clamp(11px,.7vw,13px); color:var(--presentation-muted); }
+.wg-target { position:absolute; left:-4px; right:-4px; z-index:1; border-top:2px dashed #46523f; }
+.wg-line { width:100%; height:clamp(56px,7vh,80px); margin:16px 0 6px; overflow:visible; }
+.wg-line polyline { fill:none; stroke:#5f7f8f; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.wg-line circle { fill:#5f7f8f; }
+.wg-record { margin:auto 0 0; padding-top:10px; font-size:clamp(14px,1vw,18px); color:#4d564d; }
+.wg-record b { color:var(--presentation-ink,#141b15); font-weight:600; }
+.wg-record i { font-style:normal; color:#3f6a17; font-weight:650; margin-left:4px; }
+.wg-lists { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:clamp(12px,1vw,18px); }
+.wg-wins { list-style:none; margin:0; padding:16px 20px; display:grid; gap:10px; border-radius:18px; background:#fff; border:1px solid var(--presentation-border); }
+.wg-wins li { display:flex; gap:12px; align-items:center; font-size:clamp(15px,1.1vw,20px); }
+.wg-wins li span { display:grid; place-items:center; flex-shrink:0; width:26px; height:26px; border-radius:50%; background:#e3f0cf; color:#3f6a17; font-size:13px; font-weight:700; }
+.wg-focus { display:grid; align-content:center; gap:6px; padding:18px 22px; border-radius:18px; background:#141b15; color:#fff; }
+.wg-focus span { font-size:clamp(11px,.75vw,14px); letter-spacing:.14em; color:#c5ec7c; }
+.wg-focus strong { font-size:clamp(17px,1.3vw,24px); font-weight:600; line-height:1.35; }
+.p-pitch-experiencia .p-statement { font-size:clamp(36px,3.4vw,64px)!important; }
+.p-pitch-experiencia { gap:clamp(14px,1.8vh,24px)!important; }
+.p-pitch-experiencia .p-pitch-rules p { font-size:clamp(15px,1.05vw,19px); padding-top:10px; }
+
+/* Movimiento: cada animación cuenta algo y termina; con movimiento reducido todo aparece quieto. */
+@media(prefers-reduced-motion:no-preference) {
+ .p-scene .p-scattered .p-domain { animation:p-scatter-in 700ms cubic-bezier(.22,1,.36,1) both; animation-delay:calc(260ms + var(--motion-order,0) * 1ms); }
+ .p-scene .p-scattered .p-domain:nth-child(2) { animation-delay:380ms; } .p-scene .p-scattered .p-domain:nth-child(3) { animation-delay:500ms; }
+ .p-scene .p-scattered-sources span { animation:p-pop 420ms cubic-bezier(.22,1,.36,1) both; }
+ .p-scene .p-scattered-sources span:nth-child(1) { animation-delay:780ms; } .p-scene .p-scattered-sources span:nth-child(2) { animation-delay:880ms; } .p-scene .p-scattered-sources span:nth-child(3) { animation-delay:980ms; }
+ .p-scene .p-island { animation:p-content-rise 560ms cubic-bezier(.22,1,.36,1) 250ms both; }
+ .p-scene .p-island:last-child { animation-delay:350ms; }
+ .p-scene .p-island-link i { animation:p-draw-x 520ms cubic-bezier(.22,1,.36,1) 760ms both; }
+ .p-scene .p-island-hub { animation:p-hub-arrive 620ms cubic-bezier(.22,1.3,.36,1) 1150ms both; }
+ .p-scene .p-care-node { animation:p-content-rise 520ms cubic-bezier(.22,1,.36,1) both; animation-delay:calc(240ms + var(--step) * 220ms); }
+ .p-scene .p-care-arrow { animation:p-draw-x 420ms cubic-bezier(.22,1,.36,1) both; animation-delay:calc(240ms + var(--step) * 220ms); transform-origin:left; }
+ .p-scene .wg-head { animation:p-content-rise 520ms cubic-bezier(.22,1,.36,1) 180ms both; }
+ .p-scene .wg-card { animation:p-content-rise 520ms cubic-bezier(.22,1,.36,1) both; }
+ .p-scene .wg-card:nth-child(1) { animation-delay:300ms; } .p-scene .wg-card:nth-child(2) { animation-delay:420ms; } .p-scene .wg-card:nth-child(3) { animation-delay:540ms; }
+ .p-scene .wg-dots li>span { animation:p-pop 380ms cubic-bezier(.22,1.4,.36,1) both; animation-delay:calc(700ms + var(--i) * 110ms); }
+ .p-scene .wg-dots .is-rest>span { animation-name:p-pop-rest; }
+ .p-scene .wg-bars>div>span { animation:p-grow-y 620ms cubic-bezier(.22,1,.36,1) both; animation-delay:calc(800ms + var(--i) * 90ms); }
+ .p-scene .wg-target { animation:p-draw-x 600ms cubic-bezier(.22,1,.36,1) 700ms both; transform-origin:left; }
+ .p-scene .wg-line polyline { stroke-dasharray:420; animation:p-draw-line 1100ms cubic-bezier(.45,0,.2,1) 900ms both; }
+ .p-scene .wg-line circle { animation:p-pop 300ms cubic-bezier(.22,1.4,.36,1) both; animation-delay:calc(950ms + var(--i) * 330ms); transform-box:fill-box; transform-origin:center; }
+ .p-scene .wg-wins { animation:p-content-rise 480ms cubic-bezier(.22,1,.36,1) 1400ms both; }
+ .p-scene .wg-wins li { animation:p-slide-in 460ms cubic-bezier(.22,1,.36,1) both; animation-delay:calc(1550ms + var(--i) * 140ms); }
+ .p-scene .wg-focus { animation:p-content-rise 560ms cubic-bezier(.22,1,.36,1) 2000ms both; }
+}
+@keyframes p-scatter-in { from { opacity:0; translate:var(--from-x,0) 40px; rotate:-8deg; } }
+@keyframes p-pop { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:scale(1); } }
+@keyframes p-pop-rest { from { opacity:0; transform:scale(.1); } to { opacity:1; transform:scale(.4); } }
+@keyframes p-grow-y { from { transform:scaleY(0); } to { transform:scaleY(1); } }
+@keyframes p-draw-x { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes p-draw-line { from { stroke-dashoffset:420; } to { stroke-dashoffset:0; } }
+@keyframes p-slide-in { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:none; } }
+@keyframes p-hub-arrive { from { opacity:0; transform:scale(.85); } to { opacity:1; transform:none; } }
+@media(max-width:900px) {
+ .p-islands,.p-care-flow { grid-template-columns:1fr; gap:14px; } .p-island-link,.p-care-arrow { display:none; }
+ .wg-cards,.wg-lists,.p-scattered-sources { grid-template-columns:1fr; } .p-scattered-sources { display:none; }
+}
+/* La lectura de la slide 07 se adapta al alto disponible (proyectores 768–1080 px). */
+.wg-card>strong { font-size:clamp(28px,4.4vh,52px); margin-top:6px; }
+.wg-head { padding-block:clamp(10px,1.4vh,18px); }
+.wg-head strong { font-size:clamp(22px,3.2vh,38px); }
+.wg-bars { height:clamp(44px,7.5vh,96px); margin:clamp(10px,1.3vh,16px) 0 20px; }
+.wg-line { height:clamp(40px,6.5vh,80px); margin:clamp(8px,1.3vh,16px) 0 4px; }
+.wg-dots { margin:clamp(8px,1.3vh,16px) 0 4px; }
+.wg-dots li>span { max-width:clamp(24px,3.4vh,38px); }
+.wg-card { padding:clamp(12px,1.5vh,18px) 20px; }
+.wg-wins { padding:clamp(10px,1.4vh,16px) 20px; gap:clamp(6px,.9vh,10px); }
+.wg-focus { padding:clamp(12px,1.5vh,18px) 22px; }
+@media(max-height:820px) and (min-width:901px) { .p-pitch-experiencia .p-pitch-rules,.wg-head p { display:none; } }
+@media(max-width:900px) { .p-island { padding:16px 18px; } .p-island h2 { margin:8px 0 10px; } .p-island-hub { padding:12px 18px; } .p-pitch-mercado .p-pitch-opportunity { font-size:22px; } .p-pitch-brands>span { font-size:16px; padding:6px 10px; } }
+@media(max-width:900px) {
+ .wg-cards { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .wg-card { padding:10px; } .wg-card header em,.wg-dots,.wg-bars,.wg-line,.wg-record,.wg-card>small { display:none; }
+ .wg-card header { font-size:12px; } .wg-card>strong { font-size:24px; } .wg-head p,.wg-wins,.p-pitch-experiencia .p-pitch-rules { display:none; } .wg-lists { grid-template-columns:1fr; }
+}

@@ -15,14 +15,15 @@ html[data-presentation-direction="backward"] .p-scene { --motion-direction:-1; }
  to {opacity:1;transform:none}
 }
 /* Forward and backward snapshots keep the same visual direction as the input. */
-::view-transition-old(formance-scene) {animation:p-scene-depart 420ms var(--motion-ease,cubic-bezier(.22,1,.36,1)) both}
-::view-transition-new(formance-scene) {animation:p-snapshot-arrive 520ms cubic-bezier(.22,1,.36,1) both}
-@keyframes p-scene-depart {to {opacity:0;transform:translateX(-32px) scale(.985)}}
-@keyframes p-snapshot-arrive {from {opacity:0;transform:translateX(32px) scale(.99)}to{opacity:1;transform:none}}
+/* La escena anterior se va rápido y recién después entra la nueva: nunca se superponen textos. */
+::view-transition-old(formance-scene) {animation:p-scene-depart 220ms cubic-bezier(.4,0,1,1) both}
+::view-transition-new(formance-scene) {animation:p-snapshot-arrive 480ms cubic-bezier(.22,1,.36,1) 150ms both}
+@keyframes p-scene-depart {to {opacity:0;transform:translateX(-24px)}}
+@keyframes p-snapshot-arrive {from {opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
 html[data-presentation-direction="backward"]::view-transition-old(formance-scene) {animation-name:p-snapshot-back-out}
 html[data-presentation-direction="backward"]::view-transition-new(formance-scene) {animation-name:p-snapshot-back-in}
-@keyframes p-snapshot-back-out {to{opacity:0;transform:translateX(32px) scale(.985)}}
-@keyframes p-snapshot-back-in {from{opacity:0;transform:translateX(-32px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes p-snapshot-back-out {to{opacity:0;transform:translateX(24px)}}
+@keyframes p-snapshot-back-in {from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
 /* 03 → 04: the same domain cards travel into the integrated composition. */
 @media(prefers-reduced-motion:no-preference) {
  .p-scene:is([data-scene="problema"],[data-scene="vision-objetivos"]) .p-domain:nth-child(1){view-transition-name:formance-training}

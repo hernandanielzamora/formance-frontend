@@ -21,3 +21,12 @@ export type WeeklyGlance = {
   wins: GlanceItem[]; improvements: GlanceItem[]; focus: { area: string; text: string; href: string } | null;
 };
 export type WeeklyReport = { glance?: WeeklyGlance; period: { from: string; to: string; through: string; today: string; timeZone: string; elapsedDays: number; isPartial: boolean; previousFrom: string; previousThrough: string }; current: ReportPeriod; previous: ReportPeriod; logs: ReportLog[]; comparison: { weightAverageDeltaKg: number | null; completedSessionsDelta: number; completedSetsDelta: number; recordedDaysDelta: number; externalVolumeDelta: number | null; exercises: { key: string; previous: ExerciseMetric | null; maxLoadDelta: number | null }[] } };
+
+export type MonthlyReport = { month: string; label: string; summary: string; hasRecords: boolean;
+  period: { from: string; to: string; through: string; isPartial: boolean; elapsedDays: number; today: string };
+  training: { completed: number; abandoned: number; planned: number | null; completedPlanned: number | null; completedSets: number; progress: { name: string; firstKg: number; lastKg: number; bestKg: number; deltaKg: number; sessions: number }[] };
+  nutrition: { daysLogged: number; elapsed: number; avgKcal: number | null; kcalTarget: number | null; kcalPct: number | null; onTargetDays: number | null; avgProtein: number | null; proteinTarget: number | null; proteinDays: number | null; weekendDelta: number | null };
+  weight: { count: number; firstKg: number | null; firstDate: string | null; lastKg: number | null; lastDate: string | null; changeKg: number | null; points: { date: string; kg: number }[] };
+  weeks: { weekStart: string; weekEnd: string; isPartial: boolean; tone: 'good' | 'mixed' | 'attention' | 'empty'; title: string;
+    training: { completed: number; planned: number | null; completedPlanned: number }; nutrition: { avgKcal: number | null; onTargetDays: number; daysLogged: number }; weight: { avgKg: number | null } }[];
+};

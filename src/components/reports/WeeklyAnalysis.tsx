@@ -24,7 +24,7 @@ export default function WeeklyAnalysis({ weekStart, timeZone, hasRecords, disabl
   }
   const analysis = result?.analysis;
   return <div className="coach-analysis" aria-live="polite" aria-busy={busy}>
-    {!analysis && <div className="coach-intro"><p>Una lectura escrita de tu semana y de tu último mes: qué pasó, por qué y qué priorizar.<small>Para prepararla se envían a Google tus registros y las notas de entrenamientos y comidas de las últimas 4 semanas, sin tu nombre ni tu email.</small></p>
+    {!analysis && <div className="coach-intro"><p>Un texto que interpreta esta semana: qué pasó, por qué y qué priorizar, con el contexto de tus últimas 4 semanas. Para ver los números del mes completo, abrí “Resumen del mes”.<small>Para prepararla se envían a Google tus registros y las notas de entrenamientos y comidas de las últimas 4 semanas, sin tu nombre ni tu email.</small></p>
       <button className="primary-button" disabled={busy || disabled || !hasRecords} onClick={() => void analyze()}>{busy ? 'Preparando análisis…' : 'Generar análisis'}</button></div>}
     {error && <p className="form-error" role="alert">{error}</p>}
     {analysis && <div className="coach-result">

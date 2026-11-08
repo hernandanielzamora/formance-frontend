@@ -11,7 +11,7 @@ export function readTags(path: string): Tag[] {
   const route = path.split('?')[0];
   return ({ profile: ['Profile'], 'training/catalog': ['Catalog'], 'training/routines': ['Routines'],
     'training/calendar': ['Calendar'], 'food/diary': ['Diary'], 'food/capabilities': ['Capabilities'],
-    weight: ['Weight'], 'reports/weekly': ['Reports'] } as Record<string, Tag[]>)[route] || [];
+    weight: ['Weight'], 'reports/weekly': ['Reports'], 'reports/monthly': ['Reports'] } as Record<string, Tag[]>)[route] || [];
 }
 
 export function writeTags(path: string): Tag[] {

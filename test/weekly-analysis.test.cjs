@@ -29,19 +29,19 @@ function analysisHarness(handler) {
   return { ApiError, calls, render(props = {}) { index = 0; tree = Component({ weekStart: '2026-01-05', timeZone: 'UTC', hasRecords: true, ...props }); return renderToStaticMarkup(tree); },
     click: () => findButton(tree)?.props.onClick(), reset: () => { values = []; } };
 }
-const analysis = { headline: 'Muy buena semana.', wins: ['Entrenaste 4 de 4 días.'], improvements: ['El sábado comiste 3.400 kcal.'], focus: 'Planificá el sábado.',
+const analysis = { headline: 'Muy buena semana.', wins: ['Entrenaste 4 de 4 días.'], improvements: ['El sábado comiste 3.400 kcal.'], focus: 'Planificá el sábado.', trend: 'Tercera semana completa seguida.',
   detail: { training: 'Subiste carga en sentadilla.', nutrition: 'En objetivo 5 de 7 días.', weight: 'Bajó 0,4 kg.' } };
 const result = { analysis, cached: false, fingerprint: 'hash', generatedAt: '2026-01-12' };
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 test('El análisis escrito solo se pide al pulsar y muestra titular, listas, foco y detalle', async () => {
   let release; const h = analysisHarness(() => new Promise(resolve => { release = resolve; }));
-  const initial = h.render(); assert.match(initial, /Generar análisis/); assert.equal(h.calls.length, 0); assert.doesNotMatch(initial, /\bIA\b/);
+  const initial = h.render(); assert.match(initial, /Generar análisis/); assert.match(initial, /notas de entrenamientos y comidas de las últimas 4 semanas/); assert.equal(h.calls.length, 0); assert.doesNotMatch(initial, /\bIA\b/);
   h.click(); assert.match(h.render(), /Preparando análisis…/);
   assert.equal(h.calls[0][0], 'reports/weekly-analysis'); assert.deepEqual(JSON.parse(h.calls[0][1].body), { weekStart: '2026-01-05', timeZone: 'UTC' });
   release(result); await settle();
   const rendered = h.render();
-  for (const text of [analysis.headline, ...analysis.wins, ...analysis.improvements, analysis.focus, ...Object.values(analysis.detail), 'Entrenamiento', 'Alimentación', 'Peso']) assert.ok(rendered.includes(text), text);
+  for (const text of [analysis.headline, analysis.trend, 'Últimas 4 semanas', ...analysis.wins, ...analysis.improvements, analysis.focus, ...Object.values(analysis.detail), 'Entrenamiento', 'Alimentación', 'Peso']) assert.ok(rendered.includes(text), text);
   assert.doesNotMatch(rendered, /Generar análisis/);
 });
 test('Errores y cupo agotado se informan sin ocultar el botón; deshabilitado o sin registros no consulta', async () => {

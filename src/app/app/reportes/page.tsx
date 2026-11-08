@@ -45,7 +45,7 @@ export default function ReportsPage() {
 
     <section className="report-more" aria-labelledby="report-more-title">
       <h2 id="report-more-title">Más detalle</h2>
-      <details className="report-panel"><summary><span><strong>Análisis escrito</strong><small>Una lectura en texto de tu semana y qué priorizar</small></span></summary>
+      <details className="report-panel"><summary><span><strong>Análisis escrito</strong><small>Tu semana y tu último mes en texto, con qué priorizar</small></span></summary>
         <WeeklyAnalysis key={`${session.identity?.uid}:${week}:${zone}`} weekStart={week} timeZone={zone} hasRecords={hasRecords} disabled={query.isFetching || Boolean(error)} /></details>
 
       <details className="report-panel"><summary><span><strong>Entrenamiento</strong><small>{current.training.sessions.completed} sesiones · {current.training.completedSets} series · {delta(comparison.completedSetsDelta)} vs semana anterior</small></span></summary>

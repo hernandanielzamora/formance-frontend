@@ -20,3 +20,11 @@ Los estados de cada día se distinguen por forma y texto accesible, no solo por 
 
 Validación: `npm test` (componentes reales con datos de muestra), `npm run typecheck`,
 `npm run build` y capturas a 390 y 1440 px con la API local en memoria.
+
+## Análisis escrito (v4)
+
+Al pulsar “Generar análisis”, el backend arma el contexto de las **últimas 4 semanas**
+(constancia, calorías, proteína y peso por semana), la **evolución de la carga máxima** de los
+ejercicios principales y las **notas** de entrenamientos (4 semanas) y comidas (semana
+analizada). El panel avisa que esos datos se envían a Google sin nombre ni email. La respuesta
+agrega “Últimas 4 semanas” al titular, logros, mejoras, foco y detalle por área.

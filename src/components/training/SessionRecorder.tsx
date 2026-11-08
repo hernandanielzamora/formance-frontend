@@ -53,7 +53,7 @@ export default function SessionRecorder({ initial, onSaved, onClose }: { initial
     <form onSubmit={event => { event.preventDefault(); void save('in_progress'); }}>
       {session.workoutSnapshot.entries.map((entry, entryIndex) => <fieldset className="logged-exercise" key={entry.entryId} disabled={closed || busy || conflict}>
         <legend>{entry.exerciseName}</legend><p className="set-prescription">Plan: {entry.planned.sets} series · {entry.planned.repsMin}–{entry.planned.repsMax} reps · {entry.planned.restSeconds} s de descanso</p>
-        <div className="set-column-labels" aria-hidden="true"><span>Serie</span><span>Reps</span><span>Carga (kg)</span><span>Hecha</span></div>
+        <div className="set-column-labels" aria-hidden="true"><span>N.º</span><span>Reps</span><span>Carga (kg)</span><span>Hecha</span></div>
         {entries[entryIndex].sets.map((set, setIndex) => <div className={`logged-set ${set.completed ? 'set-done' : ''}`} key={set.setId}>
           <span className="set-number">{setIndex + 1}</span>
           <label><span className="sr-only">Repeticiones, serie {setIndex + 1} de {entry.exerciseName}</span><input type="number" inputMode="numeric" min={1} max={1000} step={1} value={set.reps ?? ''} required={set.completed} onChange={event => change(entryIndex, setIndex, { reps: event.target.value === '' ? null : Number(event.target.value) })} /></label>

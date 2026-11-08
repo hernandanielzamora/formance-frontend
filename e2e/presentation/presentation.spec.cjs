@@ -40,7 +40,7 @@ test('map separates nine principal slides, speakers, notes and six academic topi
   expect(await page.locator('.p-map').evaluate(el => el.getAnimations({subtree:true}).length)).toBe(0);
   await cards.nth(7).locator('.p-map-notes summary').click();
   await expect(cards.nth(7).locator('.p-map-notes')).toContainText('FLOW 1');
-  await expect(cards.nth(7).locator('.p-map-notes')).toContainText('Balance semanal');
+  await expect(cards.nth(7).locator('.p-map-notes')).toContainText('Resumen del mes');
   await cards.nth(1).locator('.p-map-link').click(); await expect(page).toHaveURL(/#equipo$/);
 });
 
@@ -58,8 +58,10 @@ test('all principal hashes load their scene, public count and product wording', 
   await expect(page.locator('.p-pitch-answer')).toContainText('transformamos registros aislados');
   await expect(page.locator('.p-pitch-thanks')).toContainText('¿Preguntas?');
   await page.goto('/presentacion#posicionamiento');
-  await expect(page.locator('.p-slide')).toContainText('No reemplaza');
-  for (const word of ['nutricionistas', 'entrenadores', 'médicos']) await expect(page.locator('.p-slide')).toContainText(word);
+  for (const text of ['Para vos y para quien te acompaña', 'Tu entrenador o nutricionista', 'no reemplaza a nadie']) await expect(page.locator('.p-slide')).toContainText(text);
+  await expect(page.locator('.p-slide')).not.toContainText('Formance no');
+  await page.goto('/presentacion#experiencia');
+  for (const text of ['Tu semana,', 'Muy buena semana', 'Proteína en objetivo 6 de 7 días', 'FOCO PARA LA PRÓXIMA SEMANA']) await expect(page.locator('.p-slide')).toContainText(text);
 });
 
 test('keyboard, history, controls and fullscreen keep their existing behavior', async ({ page }) => {
@@ -199,8 +201,9 @@ test.describe('Motion 5 product storytelling', () => {
     const delay=locator=>locator.evaluate(el=>parseFloat(getComputedStyle(el).animationDelay));
     expect(await delay(page.locator('.p-pitch-summary'))).toBeGreaterThan(await delay(page.locator('.p-unified')));
     await page.goto('/presentacion#experiencia');
-    const delays=await page.locator('.p-pitch-pillars>.p-card').evaluateAll(nodes=>nodes.map(el=>parseFloat(getComputedStyle(el).animationDelay)));
+    const delays=await page.locator('.wg-card').evaluateAll(nodes=>nodes.map(el=>parseFloat(getComputedStyle(el).animationDelay)));
     expect(delays[1]).toBeGreaterThan(delays[0]); expect(delays[2]).toBeGreaterThan(delays[1]);
+    expect(await delay(page.locator('.wg-focus'))).toBeGreaterThan(await delay(page.locator('.wg-wins li').last()));
     await page.goto('/presentacion#cierre'); await expect(page.locator('#cierre-title')).toBeVisible();
     expect(await delay(page.locator('.p-pitch-closing-copy'))).toBeGreaterThan(await delay(page.locator('.p-pitch-closing-pillars>p').last()));
     expect(await delay(page.locator('.p-pitch-thanks'))).toBeGreaterThan(await delay(page.locator('.p-pitch-closing-copy')));

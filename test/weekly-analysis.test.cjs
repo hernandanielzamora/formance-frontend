@@ -88,7 +88,7 @@ test('ReportsPage muestra la lectura primero y deja el detalle y el análisis es
     training: { totalSessions: 0, sessions: { completed: 0, in_progress: 0, abandoned: 0 }, completedSets: 0, reps: 0, recordedLoadSets: 0, externalVolumeKg: null, exercises: [] } };
   const report = { glance, period: { from: '2026-01-05', to: '2026-01-11', through: '2026-01-11', today: '2026-01-12', elapsedDays: 7, isPartial: false },
     current: period, previous: { ...period, from: '2025-12-29', through: '2026-01-04' }, logs: [], comparison: { completedSessionsDelta: 0, completedSetsDelta: 0, weightAverageDeltaKg: null, exercises: [] } };
-  let analysisProps; let glanceProps;
+  let analysisProps; let glanceProps; let pickerProps; let monthProps;
   const Page = load('src/app/app/reportes/page.tsx', {
     react: { useEffect() {}, useState: initial => [typeof initial === 'function' ? initial() : initial, () => {}] },
     'react/jsx-runtime': require('react/jsx-runtime'), 'next/link': link,
@@ -99,10 +99,13 @@ test('ReportsPage muestra la lectura primero y deja el detalle y el análisis es
     '@/components/ui/DashboardLoading': { default: () => null }, '@/components/weight/WeightChart': { default: () => null },
     '@/components/reports/WeeklyAnalysis': { default: props => { analysisProps = props; return React.createElement('p', null, 'Análisis simulado'); } },
     '@/components/reports/WeeklyGlance': { default: props => { glanceProps = props; return React.createElement('p', null, 'Lectura simulada'); } },
+    '@/components/reports/WeekPicker': { default: props => { pickerProps = props; return React.createElement('button', null, 'Selector'); }, monthOf: week => new Date(new Date(week).getTime() + 3 * 86400000).toISOString().slice(0, 7) },
+    '@/components/reports/MonthlySummary': { default: props => { monthProps = props; return React.createElement('p', null, 'Mes simulado'); } },
   });
   const rendered = renderToStaticMarkup(Page());
   assert.ok(rendered.indexOf('Lectura simulada') < rendered.indexOf('Más detalle'));
-  for (const text of ['Tu semana', 'Análisis escrito', 'Entrenamiento', 'Alimentación', 'Peso', 'Día por día', 'Historial de registros']) assert.ok(rendered.includes(text), text);
+  for (const text of ['Tu semana', 'Selector', 'Resumen del mes', 'Mes simulado', 'Análisis escrito de esta semana', 'últimas 4 semanas', 'Entrenamiento', 'Alimentación', 'Peso', 'Día por día', 'Historial de registros']) assert.ok(rendered.includes(text), text);
   assert.doesNotMatch(rendered, /<details[^>]* open/);
   assert.equal(glanceProps.glance, glance); assert.equal(analysisProps.weekStart, '2026-01-05'); assert.equal(analysisProps.hasRecords, false);
+  assert.equal(pickerProps.week, '2026-01-05'); assert.equal(monthProps.month, '2026-01'); assert.equal(typeof monthProps.onSelectWeek, 'function');
 });

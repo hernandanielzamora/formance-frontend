@@ -10,6 +10,8 @@ import DashboardLoading from '@/components/ui/DashboardLoading';
 import WeightChart from '@/components/weight/WeightChart';
 import WeeklyAnalysis from '@/components/reports/WeeklyAnalysis';
 import WeeklyGlance from '@/components/reports/WeeklyGlance';
+import WeekPicker, { monthOf } from '@/components/reports/WeekPicker';
+import MonthlySummary from '@/components/reports/MonthlySummary';
 
 const delta = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)}`;
 const mealName = (name: string) => mealTypes.find(([key]) => key === name)?.[1] || 'Comida';
@@ -30,14 +32,14 @@ export default function ReportsPage() {
   const text = search.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const filtered = report.logs.filter(log => (!historyDate || log.localDate === historyDate) && (filter === 'all' || filter === log.type) && (!status || log.type === 'training' && log.status === status) && (!text || [log.name, log.type === 'food' ? mealName(log.name) : '', log.note, ...(log.type === 'food' ? log.items.map(item => item.name) : log.type === 'training' ? log.entries.map(entry => entry.name) : ['peso', String(log.weightKg)])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(text)));
   const hasRecords = Boolean(current.training.totalSessions || current.food.meals || current.weight.count);
+  function selectWeek(start: string) { setWeek(start); window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
   function openDay(date: string) { setSearch(''); setFilter('all'); setStatus(''); setHistoryDate(date); setHistoryOpen(true); requestAnimationFrame(() => document.getElementById('report-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' })); }
   return <div className="dashboard-view reports-page">
     <header className="reports-head">
       <div><p className="eyebrow">REPORTES</p><h1>Tu semana</h1></div>
       <div className="week-navigation" role="group" aria-label="Elegir semana"><button aria-label="Semana anterior" onClick={() => setWeek(addDays(week, -7))}>←</button>
-        <label className="week-picker"><span>{dateLabel(period.from, { day: 'numeric', month: 'short' })} – {dateLabel(period.to, { day: 'numeric', month: 'short' })}</span><input type="date" aria-label="Elegir una fecha de la semana" value={week} max={period.today} onChange={event => { if (event.target.value) setWeek(monday(event.target.value)); }} /></label>
-        <button aria-label="Semana siguiente" disabled={addDays(week, 7) > period.today} onClick={() => setWeek(addDays(week, 7))}>→</button>
-        {week !== monday(period.today) && <button className="week-today" onClick={() => setWeek(monday(period.today))}>Hoy</button>}</div>
+        <WeekPicker week={week} today={period.today} zone={zone} onSelect={setWeek} />
+        <button aria-label="Semana siguiente" disabled={addDays(week, 7) > period.today} onClick={() => setWeek(addDays(week, 7))}>→</button></div>
     </header>
     <p className="report-period">{period.isPartial ? `Semana en curso · hasta el ${dateLabel(period.through, { weekday: 'long', day: 'numeric' })}` : 'Semana cerrada'} · comparada con {dateLabel(previous.from)} – {dateLabel(previous.through)}{targets ? ' · con tu objetivo actual' : ''}</p>
     {error && <div className="form-error" role="alert"><p>{error} Se conserva el último reporte cargado.</p><button onClick={() => refresh()}>Reintentar</button></div>}
@@ -45,7 +47,10 @@ export default function ReportsPage() {
 
     <section className="report-more" aria-labelledby="report-more-title">
       <h2 id="report-more-title">Más detalle</h2>
-      <details className="report-panel"><summary><span><strong>Análisis escrito</strong><small>Tu semana y tu último mes en texto, con qué priorizar</small></span></summary>
+      <details className="report-panel"><summary><span><strong>Resumen del mes · {new Intl.DateTimeFormat('es-AR', { month: 'long', timeZone: 'UTC' }).format(new Date(`${monthOf(week)}-15T12:00:00Z`))}</strong><small>Los números del mes y cómo fue cada semana, calculados con tus registros</small></span></summary>
+        <MonthlySummary month={monthOf(week)} zone={zone} week={week} onSelectWeek={selectWeek} /></details>
+
+      <details className="report-panel"><summary><span><strong>Análisis escrito de esta semana</strong><small>Un texto que interpreta la semana, con el contexto de tus últimas 4 semanas y tus notas</small></span></summary>
         <WeeklyAnalysis key={`${session.identity?.uid}:${week}:${zone}`} weekStart={week} timeZone={zone} hasRecords={hasRecords} disabled={query.isFetching || Boolean(error)} /></details>
 
       <details className="report-panel"><summary><span><strong>Entrenamiento</strong><small>{current.training.sessions.completed} sesiones · {current.training.completedSets} series · {delta(comparison.completedSetsDelta)} vs semana anterior</small></span></summary>

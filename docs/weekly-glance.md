@@ -28,3 +28,14 @@ Al pulsar “Generar análisis”, el backend arma el contexto de las **últimas
 ejercicios principales y las **notas** de entrenamientos (4 semanas) y comidas (semana
 analizada). El panel avisa que esos datos se envían a Google sin nombre ni email. La respuesta
 agrega “Últimas 4 semanas” al titular, logros, mejoras, foco y detalle por área.
+
+## Selector de semana y resumen del mes
+
+- El rango de fechas abre un **calendario por mes**: cada fila es una semana (no se pueden elegir
+  semanas futuras) y un punto de color muestra el tono de su lectura (bien, con ajustes, a retomar).
+  Usa el mismo endpoint mensual, con caché.
+- **Resumen del mes** (en “Más detalle”) muestra el mes al que pertenece la semana elegida (el del
+  jueves): entrenamientos frente a la rutina, calorías y proteína frente al objetivo, peso, cargas del
+  mes, el patrón de fin de semana si se repite y cada semana con su tono y un botón para verla.
+  Se calcula sin IA. El **análisis escrito** sigue siendo de la semana, con el contexto de las últimas
+  4 semanas y las notas; los textos de ambos paneles lo aclaran.
